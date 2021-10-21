@@ -47,25 +47,6 @@ female crab is her number of satellites.
  	crab is distributed Poisson$(\lambda)$ where the parameter $\lambda$ is of interest.
 	\begin{enumerate}
 	\item Calculate the method of moments estimator for $\lambda$.\\
-	<<>>=
-zip.pois <- function(par, data){
-  lambda <- par[1]
-  pi <- par[2]
-  
-  EX1 <- (1-pi)*lambda
-  EX2 <- (1-pi)*(lambda^2+lambda)
-  
-  xbar1 <- mean(data)
-  xbar2 <- mean(data^2)
-  
-  c(EX1-xbar1, EX2-xbar2)
-}
-
-
-nleqslv(x = c(4.5,0.34), #best guess at parameter
-        fn = zip.pois, 
-        data = crab.dat$x)
-	@
 	\textbf{Solution:}
 	<<>>=
 	library(nleqslv)
@@ -136,14 +117,52 @@ nleqslv(x = c(4.5,0.34), #best guess at parameter
 	 \[f_X(x|\lambda,\sigma)=(1-\sigma)\frac{\lambda^x e^{-\lambda}}{x!}I(x\geq1) 
 	 + (\sigma+(1-\sigma)e^{-\lambda}) I(x=0)\]
 	 \textbf{Hint:} Noticing that this is a function of the Poisson PMF and
-	 rewriting it will help remarkably.
+	 rewriting it will help remarkably.\\
+	 \textbf{Solution:}
+	 	<<>>=
+zip.pois <- function(par, data){
+  lambda <- par[1]
+  pi <- par[2]
+  
+  EX1 <- (1-pi)*lambda
+  EX2 <- (1-pi)*(lambda^2+lambda)
+  
+  xbar1 <- mean(data)
+  xbar2 <- mean(data^2)
+  
+  c(EX1-xbar1, EX2-xbar2)
+}
+
+
+nleqslv(x = c(4.5,0.34), #best guess at parameter
+        fn = zip.pois, 
+        data = crab.dat$x)
+@
+Let's graph the results to see how accurate this approach was! 
+
+<<>>=
+library("VGAM")
+crab.dat.zim <- crab.dat %>%
+	  mutate(f = dzipois(x=x, lambda=5.4633205, pstr0=0.4550912))
+
+ggplot(crab.dat.zim, aes(x=x))+
+	  geom_histogram(aes(y=..density..), fill="deepskyblue2", color="black", 
+	                 binwidth=1)+
+	  geom_linerange(aes(ymin=0, ymax=f), color="dark red")+
+	  scale_x_continuous("Number of satellites", 
+	                     labels = as.character(sats), breaks = sats)+
+	  labs(y="Density",
+	       title="Number of observations per satellite",
+	       subtitle="Fitting Poisson distribution")
+@
+It would appear that MOM inflates zero too much, and underestimates the other values.
+
 	 \item Find the maximum likelihood estimator for $\lambda$ and $\sigma$.
 	<<>>=
 library(Rfast)
 zip.mle(crab.dat$x)
 
 #MLE
-library("VGAM")
 dpois.ll<-function(par, data, neg=T){
   lambda <- par[1]
   pi <- par[2]
@@ -159,7 +178,7 @@ optim(par = c(1,0),
 	fit with the MLE estimates. How well does the distribution fit the data?
 	<<>>=
 crab.dat.zim <- crab.dat %>%
-	  mutate(f = dzipois(x=x, lambda=5.4633, pstr0=0.4550))
+	  mutate(f = dzipois(x=x, lambda=4.5770923, pstr0=0.3496381))
 
 ggplot(crab.dat.zim, aes(x=x))+
 	  geom_histogram(aes(y=..density..), fill="deepskyblue2", color="black", 
@@ -170,8 +189,6 @@ ggplot(crab.dat.zim, aes(x=x))+
 	  labs(y="Density",
 	       title="Number of observations per satellite",
 	       subtitle="Fitting Poisson distribution")
-
-#5.4633205 0.4550912
 @
 	\end{enumerate}
 \newpage
@@ -421,7 +438,6 @@ ggplot(data=ggdat, aes(x=t, y=f))+
 <<>>=
 #no clue
 @
-      
     \end{enumerate}
     \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
   \end{enumerate}

@@ -98,31 +98,6 @@ female crab is her number of satellites.
  	crab is distributed Poisson$(\lambda)$ where the parameter $\lambda$ is of interest.
 	\begin{enumerate}
 	\item Calculate the method of moments estimator for $\lambda$.\\
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{zip.pois} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{par}\hlstd{,} \hlkwc{data}\hlstd{)\{}
-  \hlstd{lambda} \hlkwb{<-} \hlstd{par[}\hlnum{1}\hlstd{]}
-  \hlstd{pi} \hlkwb{<-} \hlstd{par[}\hlnum{2}\hlstd{]}
-
-  \hlstd{EX1} \hlkwb{<-} \hlstd{(}\hlnum{1}\hlopt{-}\hlstd{pi)}\hlopt{*}\hlstd{lambda}
-  \hlstd{EX2} \hlkwb{<-} \hlstd{(}\hlnum{1}\hlopt{-}\hlstd{pi)}\hlopt{*}\hlstd{(lambda}\hlopt{^}\hlnum{2}\hlopt{+}\hlstd{lambda)}
-
-  \hlstd{xbar1} \hlkwb{<-} \hlkwd{mean}\hlstd{(data)}
-  \hlstd{xbar2} \hlkwb{<-} \hlkwd{mean}\hlstd{(data}\hlopt{^}\hlnum{2}\hlstd{)}
-
-  \hlkwd{c}\hlstd{(EX1}\hlopt{-}\hlstd{xbar1, EX2}\hlopt{-}\hlstd{xbar2)}
-\hlstd{\}}
-
-
-\hlkwd{nleqslv}\hlstd{(}\hlkwc{x} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{4.5}\hlstd{,}\hlnum{0.34}\hlstd{),} \hlcom{#best guess at parameter}
-        \hlkwc{fn} \hlstd{= zip.pois,}
-        \hlkwc{data} \hlstd{= crab.dat}\hlopt{$}\hlstd{x)}
-\end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in nleqslv(x = c(4.5, 0.34), fn = zip.pois, data = crab.dat\$x): could not find function "{}nleqslv"{}}}\end{kframe}
-\end{knitrout}
 	\textbf{Solution:}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -223,7 +198,7 @@ female crab is her number of satellites.
        \hlkwc{subtitle}\hlstd{=}\hlstr{"Fitting Poisson distribution"}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-4-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-3-1} 
 \end{knitrout}
 	\item Let's try another distribution - the zero-inflated Poisson distribution. 
 	Now, it is believed that the distribution of the number of satellites for a 
@@ -233,7 +208,88 @@ female crab is her number of satellites.
 	 \[f_X(x|\lambda,\sigma)=(1-\sigma)\frac{\lambda^x e^{-\lambda}}{x!}I(x\geq1) 
 	 + (\sigma+(1-\sigma)e^{-\lambda}) I(x=0)\]
 	 \textbf{Hint:} Noticing that this is a function of the Poisson PMF and
-	 rewriting it will help remarkably.
+	 rewriting it will help remarkably.\\
+	 \textbf{Solution:}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{zip.pois} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{par}\hlstd{,} \hlkwc{data}\hlstd{)\{}
+  \hlstd{lambda} \hlkwb{<-} \hlstd{par[}\hlnum{1}\hlstd{]}
+  \hlstd{pi} \hlkwb{<-} \hlstd{par[}\hlnum{2}\hlstd{]}
+
+  \hlstd{EX1} \hlkwb{<-} \hlstd{(}\hlnum{1}\hlopt{-}\hlstd{pi)}\hlopt{*}\hlstd{lambda}
+  \hlstd{EX2} \hlkwb{<-} \hlstd{(}\hlnum{1}\hlopt{-}\hlstd{pi)}\hlopt{*}\hlstd{(lambda}\hlopt{^}\hlnum{2}\hlopt{+}\hlstd{lambda)}
+
+  \hlstd{xbar1} \hlkwb{<-} \hlkwd{mean}\hlstd{(data)}
+  \hlstd{xbar2} \hlkwb{<-} \hlkwd{mean}\hlstd{(data}\hlopt{^}\hlnum{2}\hlstd{)}
+
+  \hlkwd{c}\hlstd{(EX1}\hlopt{-}\hlstd{xbar1, EX2}\hlopt{-}\hlstd{xbar2)}
+\hlstd{\}}
+
+
+\hlkwd{nleqslv}\hlstd{(}\hlkwc{x} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{4.5}\hlstd{,}\hlnum{0.34}\hlstd{),} \hlcom{#best guess at parameter}
+        \hlkwc{fn} \hlstd{= zip.pois,}
+        \hlkwc{data} \hlstd{= crab.dat}\hlopt{$}\hlstd{x)}
+\end{alltt}
+\begin{verbatim}
+## $x
+## [1] 5.4633205 0.4550912
+## 
+## $fvec
+## [1] 3.674039e-11 3.937686e-10
+## 
+## $termcd
+## [1] 1
+## 
+## $message
+## [1] "Function criterion near zero"
+## 
+## $scalex
+## [1] 1 1
+## 
+## $nfcnt
+## [1] 7
+## 
+## $njcnt
+## [1] 1
+## 
+## $iter
+## [1] 7
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+Let's graph the results to see how accurate this approach was! 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(}\hlstr{"VGAM"}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: stats4}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: splines}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'VGAM'}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:tidyr':\\\#\# \\\#\# \ \ \ \ fill}}\begin{alltt}
+\hlstd{crab.dat.zim} \hlkwb{<-} \hlstd{crab.dat} \hlopt{%>%}
+          \hlkwd{mutate}\hlstd{(}\hlkwc{f} \hlstd{=} \hlkwd{dzipois}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{lambda}\hlstd{=}\hlnum{5.4633205}\hlstd{,} \hlkwc{pstr0}\hlstd{=}\hlnum{0.4550912}\hlstd{))}
+
+\hlkwd{ggplot}\hlstd{(crab.dat.zim,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x))}\hlopt{+}
+          \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{fill}\hlstd{=}\hlstr{"deepskyblue2"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"black"}\hlstd{,}
+                         \hlkwc{binwidth}\hlstd{=}\hlnum{1}\hlstd{)}\hlopt{+}
+          \hlkwd{geom_linerange}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{ymin}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{ymax}\hlstd{=f),} \hlkwc{color}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
+          \hlkwd{scale_x_continuous}\hlstd{(}\hlstr{"Number of satellites"}\hlstd{,}
+                             \hlkwc{labels} \hlstd{=} \hlkwd{as.character}\hlstd{(sats),} \hlkwc{breaks} \hlstd{= sats)}\hlopt{+}
+          \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+               \hlkwc{title}\hlstd{=}\hlstr{"Number of observations per satellite"}\hlstd{,}
+               \hlkwc{subtitle}\hlstd{=}\hlstr{"Fitting Poisson distribution"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-5-1} 
+\end{knitrout}
 	 \item Find the maximum likelihood estimator for $\lambda$ and $\sigma$.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -247,6 +303,8 @@ female crab is her number of satellites.
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: RcppZiggurat}}
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'Rfast'}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:VGAM':\\\#\# \\\#\# \ \ \ \ Rank}}
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:dplyr':\\\#\# \\\#\# \ \ \ \ nth}}
 
@@ -266,19 +324,6 @@ female crab is her number of satellites.
 \end{verbatim}
 \begin{alltt}
 \hlcom{#MLE}
-\hlkwd{library}\hlstd{(}\hlstr{"VGAM"}\hlstd{)}
-\end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: stats4}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: splines}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'VGAM'}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:Rfast':\\\#\# \\\#\# \ \ \ \ Rank}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:tidyr':\\\#\# \\\#\# \ \ \ \ fill}}\begin{alltt}
 \hlstd{dpois.ll}\hlkwb{<-}\hlkwa{function}\hlstd{(}\hlkwc{par}\hlstd{,} \hlkwc{data}\hlstd{,} \hlkwc{neg}\hlstd{=T)\{}
   \hlstd{lambda} \hlkwb{<-} \hlstd{par[}\hlnum{1}\hlstd{]}
   \hlstd{pi} \hlkwb{<-} \hlstd{par[}\hlnum{2}\hlstd{]}
@@ -315,7 +360,7 @@ female crab is her number of satellites.
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{crab.dat.zim} \hlkwb{<-} \hlstd{crab.dat} \hlopt{%>%}
-  \hlkwd{mutate}\hlstd{(}\hlkwc{f} \hlstd{=} \hlkwd{dzipois}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{lambda}\hlstd{=}\hlnum{5.4633}\hlstd{,} \hlkwc{pstr0}\hlstd{=}\hlnum{0.4550}\hlstd{))}
+  \hlkwd{mutate}\hlstd{(}\hlkwc{f} \hlstd{=} \hlkwd{dzipois}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{lambda}\hlstd{=}\hlnum{4.5770923}\hlstd{,} \hlkwc{pstr0}\hlstd{=}\hlnum{0.3496381}\hlstd{))}
 
 \hlkwd{ggplot}\hlstd{(crab.dat.zim,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x))}\hlopt{+}
   \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{fill}\hlstd{=}\hlstr{"deepskyblue2"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"black"}\hlstd{,}
@@ -328,11 +373,7 @@ female crab is her number of satellites.
        \hlkwc{subtitle}\hlstd{=}\hlstr{"Fitting Poisson distribution"}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-6-1} 
-\begin{kframe}\begin{alltt}
-\hlcom{#5.4633205 0.4550912}
-\end{alltt}
-\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-7-1} 
 \end{knitrout}
 	\end{enumerate}
 \newpage
@@ -447,7 +488,7 @@ than 13, $\mu>13$?
 \hlkwd{hist}\hlstd{(uis}\hlopt{$}\hlstd{BECK)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
 \end{knitrout}
       \item What is the test statistics for this test?\\
       \textbf{Solution:} Mean would be our test statistics.
@@ -526,7 +567,7 @@ than 13, $\mu>13$?
            \hlkwc{size}\hlstd{=}\hlnum{3}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-12-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-13-1} 
 \end{knitrout}
       \item Report a 95\% confidence interval for the average BECK depression score
 and interpret it in the context of this question.
@@ -655,11 +696,12 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{pValue} \hlkwb{<-} \hlkwd{prop.test}\hlstd{(}\hlkwd{table}\hlstd{(nodal}\hlopt{$}\hlstd{r)[}\hlnum{2}\hlstd{],} \hlkwd{nrow}\hlstd{(uis),} \hlkwc{alternative}\hlstd{=}\hlstr{"two.sided"}\hlstd{)}
-\hlstd{pValue}\hlopt{$}\hlstd{p.value}
+\hlstd{zAns} \hlkwb{<-} \hlstd{(phat}\hlopt{-}\hlstd{p0)}\hlopt{/}\hlkwd{sqrt}\hlstd{((p0}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{-}\hlstd{p0))}\hlopt{/}\hlstd{(n))}
+\hlstd{zAns}
 \end{alltt}
 \begin{verbatim}
-## [1] 7.32734e-110
+##         1 
+## -1.785687
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -667,11 +709,30 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{#No clue}
+\hlstd{ggdat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{t}\hlstd{=}\hlkwd{seq}\hlstd{(}\hlopt{-}\hlnum{5}\hlstd{,}\hlnum{5}\hlstd{,}\hlkwc{length}\hlstd{=}\hlnum{500}\hlstd{))}\hlopt{%>%}
+  \hlkwd{mutate}\hlstd{(}\hlkwc{f}\hlstd{=}\hlkwd{dt}\hlstd{(}\hlkwc{x}\hlstd{=t,} \hlkwc{df}\hlstd{=n}\hlopt{-}\hlnum{1}\hlstd{))}
+
+\hlkwd{ggplot}\hlstd{(}\hlkwc{data}\hlstd{=ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=t,} \hlkwc{y}\hlstd{=f))}\hlopt{+}
+  \hlkwd{geom_line}\hlstd{()} \hlopt{+}
+  \hlkwd{geom_hline}\hlstd{(}\hlkwc{yintercept}\hlstd{=}\hlnum{0}\hlstd{)}\hlopt{+}
+  \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=zAns,} \hlkwc{y}\hlstd{=}\hlnum{0}\hlstd{),} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
+  \hlkwd{geom_vline}\hlstd{(}\hlkwc{xintercept}\hlstd{=}\hlkwd{qt}\hlstd{(}\hlkwc{p}\hlstd{=}\hlnum{0.975}\hlstd{,} \hlkwc{df}\hlstd{=n}\hlopt{-}\hlnum{1}\hlstd{),}
+              \hlkwc{linetype}\hlstd{=}\hlstr{"dashed"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
+  \hlkwd{geom_vline}\hlstd{(}\hlkwc{xintercept}\hlstd{=}\hlkwd{qt}\hlstd{(}\hlkwc{p}\hlstd{=}\hlnum{0.025}\hlstd{,} \hlkwc{df}\hlstd{=n}\hlopt{-}\hlnum{1}\hlstd{),}
+              \hlkwc{linetype}\hlstd{=}\hlstr{"dashed"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-20-1} 
+\end{knitrout}
+      \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#no clue}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
-      \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
+      
     \end{enumerate}
     \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
   \end{enumerate}
