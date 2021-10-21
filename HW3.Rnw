@@ -1,0 +1,444 @@
+\documentclass{article}
+\usepackage{amsmath} %This allows me to use the align functionality.
+                     %If you find yourself trying to replicate
+                     %something you found online, ensure you're
+                     %loading the necessary packages!
+\usepackage{amsfonts}%Math font
+\usepackage{graphicx}%For including graphics
+\usepackage{hyperref}%For Hyperlinks
+\hypersetup{colorlinks = true,citecolor=black}
+\usepackage{natbib}        %For the bibliography
+\bibliographystyle{apalike}%For the bibliography
+\usepackage[margin=1.0in]{geometry}
+\usepackage{float}
+\begin{document}
+\noindent \textbf{MA 354: Data Analysis I -- Fall 2021}\\%\\ gives you a new line
+\noindent \textbf{Homework 3:}\vspace{1em}\\
+\emph{Complete the following opportunities to use what we've talked about in class. These questions will be graded for correctness, communication and succinctness. Ensure you show your work and explain your logic in a legible and refined submission.}
+%Comments -- anything after % is not put into the PDF
+\begin{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%  Question 0
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[0.] \textbf{Complete weekly diagnostics.}
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%  Question 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Consider  data originally from a study of the nesting horseshoe crabs 
+\citep{Brockmann96}. Each female crab in the study had a male crab attached to 
+her in her nest. The study investigated factors that affect whether the female 
+crab had any other males, called satellites, residing nearby her. Explanatory 
+variables thought possibly to affect this included the female crab's color, 
+spine condition, weight, and carapace width. The response outcome for each 
+female crab is her number of satellites.
+	 The sample is
+	\begin{center}
+		\begin{tabular}{|ccccccccccccccccc|}\hline
+		 Number of Satellites& 0 & 1&  2&  3&  4&  5&  6&  7&  8&  9& 10& 11& 12& 13 &14& 15\\ \hline
+		 Number of Observations&62& 16&  9& 19& 19& 15& 13&  4&  6&  3&  3&  1&  1&  1&  1&1\\\hline
+ 		\end{tabular}
+	\end{center}
+ 	It is believed that the distribution of the number of satellites for a female 
+ 	crab is distributed Poisson$(\lambda)$ where the parameter $\lambda$ is of interest.
+	\begin{enumerate}
+	\item Calculate the method of moments estimator for $\lambda$.\\
+	<<>>=
+zip.pois <- function(par, data){
+  lambda <- par[1]
+  pi <- par[2]
+  
+  EX1 <- (1-pi)*lambda
+  EX2 <- (1-pi)*(lambda^2+lambda)
+  
+  xbar1 <- mean(data)
+  xbar2 <- mean(data^2)
+  
+  c(EX1-xbar1, EX2-xbar2)
+}
+
+
+nleqslv(x = c(4.5,0.34), #best guess at parameter
+        fn = zip.pois, 
+        data = crab.dat$x)
+	@
+	\textbf{Solution:}
+	<<>>=
+	library(nleqslv)
+	#put data into the dataframe
+	crab.dat <- data.frame(x=c(rep(0,62), rep(1, 16), rep(2, 9), rep(3, 19),
+	                           rep(4, 19), rep(5, 15), rep(6, 13), rep(7, 4),
+	                           rep(8, 6), rep(9, 3), rep(10, 3), 11, 12,
+	                           13, 14, 15))
+	
+	
+	
+	#MOM function
+	momfunc <- function(par, data){
+	  population.mean <- par
+	  sample.mean <- mean(data)
+	  return(sample.mean-population.mean)
+	}
+	
+	answer <- nleqslv(x=1,      
+        fn = momfunc,
+        data=crab.dat$x)
+	
+	answer$x
+	@
+	\item Find the maximum likelihood estimator for $\lambda$.\\
+	\textbf{Solution:}
+	<<>>=
+	LLfunc <- function(par, data){
+	  answer <- sum(dpois(x=data, lambda = par, log=T))
+	  -answer
+	}
+
+	answer <- optim(par = 1,
+      fn = LLfunc,   
+      data = crab.dat$x, 
+      method = "Brent",  
+      lower = 0,         
+      upper = 100) 
+	
+	answer
+	@
+	\item Plot the data with the Poisson distribution fit with the MLE estimates. 
+	How well does the distribution fit the data? 
+	<<>>=
+	library(ggplot2)
+	library(tidyverse)
+	
+	crab.dat.plot <- crab.dat %>%
+	  mutate(f = dpois(x=x, lambda=2.977011))
+	
+	
+	sats <- 0:15
+	ggplot(crab.dat.plot, aes(x=x))+
+	  geom_histogram(aes(y=..density..), fill="deepskyblue2", color="black", 
+	                 binwidth=1)+
+	  geom_linerange(aes(ymin=0, ymax=f), color="dark red")+
+	  scale_x_continuous("Number of satellites", 
+	                     labels = as.character(sats), breaks = sats)+
+	  labs(y="Density",
+	       title="Number of observations per satellite",
+	       subtitle="Fitting Poisson distribution")
+	@
+	\item Let's try another distribution - the zero-inflated Poisson distribution. 
+	Now, it is believed that the distribution of the number of satellites for a 
+	female crab is distributed Poisson$_0(\lambda,\sigma)$ where the parameters 
+	$\lambda$ and $\sigma$ are of interest. Find the method of moments estimators 
+	for both $\sigma$ and $\lambda$.
+	 \[f_X(x|\lambda,\sigma)=(1-\sigma)\frac{\lambda^x e^{-\lambda}}{x!}I(x\geq1) 
+	 + (\sigma+(1-\sigma)e^{-\lambda}) I(x=0)\]
+	 \textbf{Hint:} Noticing that this is a function of the Poisson PMF and
+	 rewriting it will help remarkably.
+	 \item Find the maximum likelihood estimator for $\lambda$ and $\sigma$.
+	<<>>=
+library(Rfast)
+zip.mle(crab.dat$x)
+
+#MLE
+library("VGAM")
+dpois.ll<-function(par, data, neg=T){
+  lambda <- par[1]
+  pi <- par[2]
+  ll <- sum(dzipois(x=data, lambda=lambda, pstr0=pi, log=T))
+  ifelse(neg, -ll, ll)
+}
+
+optim(par = c(1,0),
+      fn = dpois.ll,
+      data=crab.dat$x)
+  @
+	\item Plot a histogram of the data with the zero-inflated Poisson distribution
+	fit with the MLE estimates. How well does the distribution fit the data?
+	<<>>=
+crab.dat.zim <- crab.dat %>%
+	  mutate(f = dzipois(x=x, lambda=5.4633, pstr0=0.4550))
+
+ggplot(crab.dat.zim, aes(x=x))+
+	  geom_histogram(aes(y=..density..), fill="deepskyblue2", color="black", 
+	                 binwidth=1)+
+	  geom_linerange(aes(ymin=0, ymax=f), color="dark red")+
+	  scale_x_continuous("Number of satellites", 
+	                     labels = as.character(sats), breaks = sats)+
+	  labs(y="Density",
+	       title="Number of observations per satellite",
+	       subtitle="Fitting Poisson distribution")
+
+#5.4633205 0.4550912
+@
+	\end{enumerate}
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%  Question 2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item The time to death for rats injected with a toxic substance, denoted by $Y$
+	(measured in days), follows an exponential distribution with $\lambda = 1/5$. That is,
+	\[Y \sim \textrm{exponential}(\lambda = 1/5).\]
+	This is the population distribution. It describes the time to death for all individual rats in the population.
+
+  The \textbf{exponential distribution} serves as a very good model for measurements like waiting times or lifetimes.
+  \begin{align*}
+  \lambda &\in \mathbb{R^+}  \tag*{\textbf{[Parameters]}}\\
+  \mathcal{X}&= \{\omega: \omega \in \mathbb{R^+}\} \tag*{\textbf{[Support]}}\\
+  f_X(x|\mu,\sigma) &= \lambda e^{-\lambda x}~ I(x \in \mathbb{R^+}) \tag*{\textbf{[PDF]}}\\
+  F_X(x|\mu,\sigma) &= \left(1- e^{-\lambda x}\right)I(x \in \mathbb{R^+}\tag*{\textbf{[CDF]}}\\
+  F_X^{-1}(p|\mu,\sigma) &= \frac{-\ln(1-p)}{\lambda} \tag*{\textbf{[Inverse CDF]}}\\
+  E(X) &= \frac{1}{\lambda} \tag*{\textbf{[Expected Value]}}\\
+  var(X) &= \frac{1}{\lambda^2}\tag*{\textbf{[Population Variance]}}\\
+  \end{align*}
+	\begin{enumerate}
+	  \item Plot the exponential$(\lambda = 1/5)$ population distribution.
+	  \item Mathematical statisticians can show the exact sampling distributions 
+	  of $\bar{Y}$ are gamma; i.e.,
+	  \[\bar{Y} \sim \textrm{gamma}(\alpha=n,\beta=\frac{1}{n\lambda}).\]
+	  The gamma distribution is described below.
+\begin{align*}
+\alpha &> 0, \beta>0 \tag*{\textbf{[Parameters]}}\\
+\mathcal{X} = (0, \infty)\tag*{\textbf{[Support]}}\\
+f_X(x) &= \frac{1}{\beta^\alpha \Gamma(\alpha)} x^{\alpha-1} e^{-x/\beta} I(x>0)
+\tag*{\textbf{[PDF]}}\\
+E(X) = \alpha \beta \tag*{\textbf{[Population Mean]}}\\
+var(X) = \alpha \beta^2 \tag*{\textbf{[Population Variance]}}
+\end{align*}
+You can ask \texttt{R} for the gamma distribution PDF using 
+\texttt{dgamma(x=x,shape=alpha,scale=beta)}.
+Plot the exact sampling distribution for $n=2$, $n=10$, $n=35$, and
+$n=50$.
+	  \item The Central Limit Theorem says that as $n$ increases, the sampling 
+	  distribution of $\bar{Y}$ can be well approximated with a Gaussian 
+	  distribution. Superimpose the approximate sampling distribution of $\bar{Y}$
+	  for $n=2$, $n=10$, $n=35$, and $n=50$.
+	  \item Find the probability that a randomly selected rat injected with the toxic substance
+	  lives between 1 and 3 days.
+	  \item Find the exact probability, using the exact sampling distribution, that two randomly selected rats injected with the toxic substance live  between 1 and 3 days on average.
+  \item Find the approximate probability, using the Central Limit Theorem, that two randomly 
+	  selected rats injected with the toxic substance live between 1 and 3 days on average. Comment
+	  on connection between the results and the assumptions of Central Limit Theorem.
+\item Under what conditions would the approximate probability calculated in 
+part (f) better match the exact probability in part (e)?
+  \end{enumerate}
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%  Question 3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Below you will load and summarize a dataset 
+  containing 575 observations of drug treatments. The data includes the following
+  \begin{itemize}
+    \item ID --	Identification Code	(1 - 575)
+    \item AGE	-- Age at Enrollment	(Years)
+    \item BECK -- Beck Depression Score	(0.000 - 54.000)
+    \item HC --	Heroin/Cocaine Use During	3 Months Prior to Admission (1 = Heroin
+    \& Cocaine; 2 = Heroin Only, 3 = Cocaine Only; 4 = Neither Heroin nor Cocaine)
+    \item IV -- History of IV Drug Use	(1 = Never; 2 = Previous; 3 = Recent)
+    \item IV3	-- Recent IV use	(1 = Yes; 0 = No)
+    \item NDT -- Number of Prior Drug Treatments (0 - 40)
+    \item RACE -- Subject's Race	(0 = White; 1 = Non-White)
+\item TREAT -- Treatment Randomization (0 = Short Assignment;	1 = Long Assignment)
+\item SITE -- Treatment Site (0 = A; 1 = B)
+\item LEN.T	-- Length of Stay in Treatment (Days Admission Date to Exit Date)	
+\item TIME -- Time to Drug Relapse (Days Measured from Admission Date)
+\item CENSOR -- Event for Treating Lost to Follow-Up as Returned to Drugs 
+(1 = Returned to Drugs or Lost to Follow-Up; 0 = Otherwise)
+\item etc.
+\end{itemize}
+\begin{enumerate} %this begins a lettered enumerate so I can ask more 
+%than one question in a question.
+\item Load the data provided in the ``quantreg" package for \texttt{R} \citep{quantreg}.
+<<warning=FALSE,message=FALSE>>=
+library("quantreg")
+data("uis")
+@
+\item Is there evidence that patients receiving drug treatments are at least mildly depressed
+on average? That is, is there evidence that the average BECK depression score is greater
+than 13, $\mu>13$?
+    \begin{enumerate}
+      \item What is the null hypothesis for this test?\\
+      \textbf{Solution:} $H_{0}: \mu=13$
+      \item What is the alternative hypothesis for this test?\\
+      \textbf{Solution:} $H_{a}: \mu>13$
+      \item What is the sample mean BECK score for these data?\\
+      \textbf{Solution:}
+<<>>=
+mu <- mean(uis$BECK)
+paste("The mean of BECK is", mean(mu))
+hist(uis$BECK)
+@
+      \item What is the test statistics for this test?\\
+      \textbf{Solution:} Mean would be our test statistics.
+<<>>=
+mean(uis$BECK)
+median(uis$BECK)
+#Mean is basically equal to median, so we don't really care. c:
+@
+      \item At what value of $\bar{X}$ does the rejection region start for $\alpha=0.05$?\\
+      
+      \begin{align*}
+	se &= \frac{s}{\sqrt{n}} \tag{Formula for finding t-value}\\
+	t &= \frac{\bar{X}-\mu}{se} \tag{Formula for finding t-value}\\
+	\bar{X} &= t*se + \mu \tag{Solving for $\bar{X}$}
+	    \end{align*}
+<<>>=
+n<-nrow(uis)
+se = sd(uis$BECK)/sqrt(n)
+(value<-(qt(.95, n-1)*se)+mu)
+@
+      \item What is the p value for this test?
+<<>>=
+n=nrow(uis)
+tstat <- t.test(x=uis$BECK,
+       mu = 13,         
+       alternative = "greater")
+
+tstat$p.value
+@
+      \item Graph the results of this test.
+<<>>=
+ggdat <- data.frame(t=seq(-5,5,length=500))%>%
+  mutate(f=dt(x=t, df=n-1))
+
+ggplot(data=ggdat, aes(x=t, y=f))+
+  geom_line() +
+  geom_hline(yintercept=0)+
+  geom_point(aes(x=tstat$statistic, y=0), color="red")+
+  geom_vline(xintercept=qt(p=0.95, df=n-1),
+             linetype="dashed", color="red")+
+  annotate("text", x=1.2*qt(p=0.95, df=n-1), y=0.30,
+           label="Rejection Region", angle="270",
+           color="red")+
+  annotate("text", x=tstat$statistic-1.8, y=0.02,
+           label="P-value = 7.41 * 10^-27",
+           size=3)
+@
+      \item Report a 95\% confidence interval for the average BECK depression score
+and interpret it in the context of this question.
+<<>>=
+ci<-t.test(x=uis$BECK,
+       alternative = "two.sided")
+
+paste("The confidence interval is [", ci$conf.int[1], ", ", ci$conf.int[2],"]", sep="")
+@
+    \end{enumerate}
+\item Is there a significant difference in the length of stay in treatment by 
+    treatment site?\\
+\textbf{Solution:}
+\begin{align*}
+H_{0}&:\mu_{0}=\mu{1}\\
+H_{a}&:\mu_{0}\neq\mu{1}
+\end{align*}
+<<>>=
+res <- t.test(uis$LEN.T ~ uis$SITE, data = uis, var.equal = TRUE)
+res
+@
+  \end{enumerate}
+  \newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%  Question 4
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Below you will load and summarize a dataset containing 53 observations of prostate cance patients.
+In this research, a number of possible predictor variables were measured before surgery. The patients then 
+had surgery to determine nodal involvement. 
+  \begin{itemize}
+    \item r -- Nodal Involvement (0=No, 1=Yes)
+    \item aged	-- Age Group (0=Less than 60, 1=At least 60)
+    \item stage -- Palpitation Result Severity (0=Less severe, 1=More severe)
+    \item grade -- Biopsy Result Severity (0=Less severe, 1=More severe)
+    \item xray -- X-ray Result Severity (0=Less severe, 1=More severe)
+    \item acid -- the level of acid phosphatase in the blood serum
+\end{itemize}
+The treatment strategy for a patient diagnosed with cancer of the prostate depend highly on whether the cancer has spread to the surrounding lymph nodes (nodal involvement). It is common to operate on the patient to get samples from the nodes which can then be analysed under a microscope.
+
+\begin{enumerate} %this begins a lettered enumerate so I can ask more 
+%than one question in a question.
+\item Load the data provided in the ``boot" package for \texttt{R} \citep{boot}.
+<<warning=FALSE,message=FALSE>>=
+library("boot")
+data("nodal")
+@
+\item Is there evidence that less than half of prostate cancer patients have nodal involvment?
+    \begin{enumerate}
+      \item What is the null hypothesis for this test?\\
+      \textbf{Solution:}  $H_{0}: \hat{P}=0.5$
+      \item What is the alternative hypothesis for this test?\\
+      \textbf{Solution:}  $H_{0}: \hat{P}\neq0.5$
+      \item What is the sample proportion of patients with nodal involvement for these data?\\
+      \textbf{Solution:} Something
+<<>>=
+table(nodal$r)[2]/nrow(nodal) #.37%
+@
+      \item What is the test statistics for this test?\\
+      \textbf{Solution:} Z-value 
+      \item At what value of $\hat{P}$ does the rejection region start for $\alpha=0.05$?
+      \begin{align*}
+      z &= \frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}\\
+      \hat{p} &= \frac{\sqrt{n}z\sqrt{p_{0}(1-p_{0})}}{n} + p_{0}
+      \end{align*}
+<<>>=
+p0 <- 0.5
+phat <- table(nodal$r)[2]/nrow(nodal)
+n <- nrow(nodal)
+z1 <- qt(.975, n-1)
+z2 <- -z1
+
+(sqrt(n)*z1*sqrt(p0*(1-p0)))/(n) + p0 #for upper bound
+(sqrt(n)*z2*sqrt(p0*(1-p0)))/(n) + p0 #for lower bound
+
+
+
+@
+      \item What is the p value for this test?
+<<>>=
+zAns <- (phat-p0)/sqrt((p0*(1-p0))/(n))
+zAns
+@
+      \item Graph the results of this test.
+<<>>=
+ggdat <- data.frame(t=seq(-5,5,length=500))%>%
+  mutate(f=dt(x=t, df=n-1))
+
+ggplot(data=ggdat, aes(x=t, y=f))+
+  geom_line() +
+  geom_hline(yintercept=0)+
+  geom_point(aes(x=zAns, y=0), color="red")+
+  geom_vline(xintercept=qt(p=0.975, df=n-1),
+              linetype="dashed", color="red")+
+  geom_vline(xintercept=qt(p=0.025, df=n-1),
+              linetype="dashed", color="red")
+@
+      \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
+<<>>=
+#no clue
+@
+      
+    \end{enumerate}
+    \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
+  \end{enumerate}
+\end{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%  Bibliography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\noindent \textbf{Bonus 1:} Use the gganimate package \citep{gganimate} for \texttt{R} to create a plot that demonstrates the Central Limit Theorem for the Poisson, Binomial, Exponential, and Gaussian distributions in a $2\times 2$ grid as \href{https://moodle.colgate.edu/mod/forum/discuss.php?d=127682}{here}.\\
+
+Note that we can't add GIFs to the .pdf document, so you'll have to email me your code for this part. You'll find \texttt{  transition\_time()} helpful for creating your animation and \texttt{gganimate\_save()} helpful for saving your animation. \vspace{2em}\\
+
+
+\noindent \textbf{Bonus 2:} Compare the effectiveness of the $t$-interval with the bootstrap interval. In a loop, generate 1000 datasets, evaluate a $t$ and bootstrapping confidence interval for each set of data, and track whether you've captured the true population mean. An effective answer here would evaluate this several times varying sample size and the data generating distribution.
+
+\newpage
+\bibliography{bib}
+\end{document}
