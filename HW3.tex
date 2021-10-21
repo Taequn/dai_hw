@@ -290,6 +290,8 @@ Let's graph the results to see how accurate this approach was!
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-5-1} 
 \end{knitrout}
+It would appear that MOM inflates zero too much, and underestimates the other values.
+
 	 \item Find the maximum likelihood estimator for $\lambda$ and $\sigma$.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -399,6 +401,19 @@ Let's graph the results to see how accurate this approach was!
   \end{align*}
 	\begin{enumerate}
 	  \item Plot the exponential$(\lambda = 1/5)$ population distribution.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{x}\hlkwb{<-}\hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{100}\hlstd{,} \hlnum{0.1}\hlstd{)}
+\hlstd{y}\hlkwb{<-}\hlkwd{dexp}\hlstd{(x,} \hlnum{1}\hlopt{/}\hlnum{5}\hlstd{)}
+\hlstd{ggdat}\hlkwb{<-}\hlkwd{data.frame}\hlstd{(x,y)}
+
+\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y))}\hlopt{+}
+  \hlkwd{geom_line}\hlstd{()}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
+\end{knitrout}
 	  \item Mathematical statisticians can show the exact sampling distributions 
 	  of $\bar{Y}$ are gamma; i.e.,
 	  \[\bar{Y} \sim \textrm{gamma}(\alpha=n,\beta=\frac{1}{n\lambda}).\]
@@ -415,13 +430,106 @@ You can ask \texttt{R} for the gamma distribution PDF using
 \texttt{dgamma(x=x,shape=alpha,scale=beta)}.
 Plot the exact sampling distribution for $n=2$, $n=10$, $n=35$, and
 $n=50$.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(patchwork)}
+\hlstd{ggdat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{x1}\hlstd{=}\hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{100}\hlstd{,} \hlnum{0.1}\hlstd{))}\hlopt{%>%}
+  \hlkwd{mutate}\hlstd{(}\hlkwc{y1} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)),}
+         \hlkwc{y2} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{10}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),}
+         \hlkwc{y3} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{shape}\hlstd{=}\hlnum{35}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{35}\hlopt{*}\hlnum{0.2}\hlstd{)),}
+         \hlkwc{y4} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{shape}\hlstd{=}\hlnum{50}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{50}\hlopt{*}\hlnum{0.2}\hlstd{)))}
+
+\hlstd{plot1}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y1))}\hlopt{+}
+  \hlkwd{geom_line}\hlstd{()}\hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
+
+\hlstd{plot2}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y2))}\hlopt{+}
+  \hlkwd{geom_line}\hlstd{()}\hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
+
+\hlstd{plot3}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y2))}\hlopt{+}
+  \hlkwd{geom_line}\hlstd{()}\hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
+
+\hlstd{plot4}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y4))}\hlopt{+}
+  \hlkwd{geom_line}\hlstd{()}\hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
+
+\hlstd{(plot1}\hlopt{|}\hlstd{plot2)}\hlopt{/}\hlstd{(plot3}\hlopt{|}\hlstd{plot4)}
+\end{alltt}
+
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
+\end{knitrout}
 	  \item The Central Limit Theorem says that as $n$ increases, the sampling 
 	  distribution of $\bar{Y}$ can be well approximated with a Gaussian 
 	  distribution. Superimpose the approximate sampling distribution of $\bar{Y}$
 	  for $n=2$, $n=10$, $n=35$, and $n=50$.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{plot1} \hlkwb{<-} \hlstd{plot1}\hlopt{+}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
+                \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
+
+\hlstd{plot2} \hlkwb{<-} \hlstd{plot2}\hlopt{+}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
+                \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
+
+\hlstd{plot3} \hlkwb{<-} \hlstd{plot3}\hlopt{+}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
+                \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
+
+\hlstd{plot4} \hlkwb{<-} \hlstd{plot4}\hlopt{+}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
+                \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
+
+\hlstd{(plot1}\hlopt{|}\hlstd{plot2)}\hlopt{/}\hlstd{(plot3}\hlopt{|}\hlstd{plot4)}
+\end{alltt}
+
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-10-1} 
+\end{knitrout}
 	  \item Find the probability that a randomly selected rat injected with the toxic substance
 	  lives between 1 and 3 days.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# P(x < 3) & P(x > 1) = 1-P(x<1)-P(x>3) = 1-P(x<=1)-(1-P(x>3))}
+\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlnum{0.2}\hlstd{)}\hlopt{-}\hlstd{(}\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{3}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlnum{0.2}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.2699191
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 	  \item Find the exact probability, using the exact sampling distribution, that two randomly selected rats injected with the toxic substance live  between 1 and 3 days on average.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# P(x < 3) & P(x > 1) = 1-P(x<1)-P(x>3) = 1-P(x<=1)-(1-P(x>3))}
+\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{))}\hlopt{-}\hlstd{(}\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{3}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)))}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.2758208
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
   \item Find the approximate probability, using the Central Limit Theorem, that two randomly 
 	  selected rats injected with the toxic substance live between 1 and 3 days on average. Comment
 	  on connection between the results and the assumptions of Central Limit Theorem.
@@ -484,11 +592,7 @@ than 13, $\mu>13$?
 \begin{verbatim}
 ## [1] "The mean of BECK is 17.367427826087"
 \end{verbatim}
-\begin{alltt}
-\hlkwd{hist}\hlstd{(uis}\hlopt{$}\hlstd{BECK)}
-\end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
 \end{knitrout}
       \item What is the test statistics for this test?\\
       \textbf{Solution:} Mean would be our test statistics.
@@ -567,7 +671,7 @@ than 13, $\mu>13$?
            \hlkwc{size}\hlstd{=}\hlnum{3}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-13-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-18-1} 
 \end{knitrout}
       \item Report a 95\% confidence interval for the average BECK depression score
 and interpret it in the context of this question.
@@ -577,7 +681,8 @@ and interpret it in the context of this question.
 \hlstd{ci}\hlkwb{<-}\hlkwd{t.test}\hlstd{(}\hlkwc{x}\hlstd{=uis}\hlopt{$}\hlstd{BECK,}
        \hlkwc{alternative} \hlstd{=} \hlstr{"two.sided"}\hlstd{)}
 
-\hlkwd{paste}\hlstd{(}\hlstr{"The confidence interval is ["}\hlstd{, ci}\hlopt{$}\hlstd{conf.int[}\hlnum{1}\hlstd{],} \hlstr{", "}\hlstd{, ci}\hlopt{$}\hlstd{conf.int[}\hlnum{2}\hlstd{],}\hlstr{"]"}\hlstd{,} \hlkwc{sep}\hlstd{=}\hlstr{""}\hlstd{)}
+\hlkwd{paste}\hlstd{(}\hlstr{"The confidence interval is ["}\hlstd{, ci}\hlopt{$}\hlstd{conf.int[}\hlnum{1}\hlstd{],} \hlstr{", "}\hlstd{,}
+      \hlstd{ci}\hlopt{$}\hlstd{conf.int[}\hlnum{2}\hlstd{],}\hlstr{"]"}\hlstd{,} \hlkwc{sep}\hlstd{=}\hlstr{""}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
 ## [1] "The confidence interval is [16.6029755170859, 18.131880135088]"
@@ -722,7 +827,7 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
               \hlkwc{linetype}\hlstd{=}\hlstr{"dashed"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-20-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-25-1} 
 \end{knitrout}
       \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
 \begin{knitrout}
@@ -732,7 +837,6 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
 \end{alltt}
 \end{kframe}
 \end{knitrout}
-      
     \end{enumerate}
     \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
   \end{enumerate}
