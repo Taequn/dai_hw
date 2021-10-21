@@ -214,6 +214,14 @@ ggplot(crab.dat.zim, aes(x=x))+
   \end{align*}
 	\begin{enumerate}
 	  \item Plot the exponential$(\lambda = 1/5)$ population distribution.
+	  <<>>=
+x<-seq(0, 100, 0.1)
+y<-dexp(x, 1/5)
+ggdat<-data.frame(x,y)
+
+ggplot(ggdat, aes(x=x, y=y))+
+  geom_line()
+@
 	  \item Mathematical statisticians can show the exact sampling distributions 
 	  of $\bar{Y}$ are gamma; i.e.,
 	  \[\bar{Y} \sim \textrm{gamma}(\alpha=n,\beta=\frac{1}{n\lambda}).\]
@@ -230,13 +238,66 @@ You can ask \texttt{R} for the gamma distribution PDF using
 \texttt{dgamma(x=x,shape=alpha,scale=beta)}.
 Plot the exact sampling distribution for $n=2$, $n=10$, $n=35$, and
 $n=50$.
+<<>>=
+library(patchwork)
+ggdat <- data.frame(x1=seq(0, 100, 0.1))%>%
+  mutate(y1 = dgamma(x=x1, shape=2, scale=1/(2*0.2)),
+         y2 = dgamma(x=x1, shape=10, scale=1/(10*0.2)),
+         y3 = dgamma(x=x, shape=35, scale=1/(35*0.2)),
+         y4 = dgamma(x=x, shape=50, scale=1/(50*0.2)))
+
+plot1<-ggplot(ggdat, aes(x=x, y=y1))+
+  geom_line()+
+  xlim(0,30)
+
+plot2<-ggplot(ggdat, aes(x=x, y=y2))+
+  geom_line()+
+  xlim(0,30)
+
+plot3<-ggplot(ggdat, aes(x=x, y=y2))+
+  geom_line()+
+  xlim(0,30)
+
+plot4<-ggplot(ggdat, aes(x=x, y=y4))+
+  geom_line()+
+  xlim(0,30)
+
+(plot1|plot2)/(plot3|plot4)
+@
 	  \item The Central Limit Theorem says that as $n$ increases, the sampling 
 	  distribution of $\bar{Y}$ can be well approximated with a Gaussian 
 	  distribution. Superimpose the approximate sampling distribution of $\bar{Y}$
 	  for $n=2$, $n=10$, $n=35$, and $n=50$.
+	  <<>>=
+plot1 <- plot1+
+  geom_function(fun=dnorm, args=list(mean=5, sd=1), 
+                color="red")
+
+plot2 <- plot2+
+  geom_function(fun=dnorm, args=list(mean=5, sd=1), 
+                color="red")
+
+plot3 <- plot3+
+  geom_function(fun=dnorm, args=list(mean=5, sd=1), 
+                color="red")
+
+plot4 <- plot4+
+  geom_function(fun=dnorm, args=list(mean=5, sd=1), 
+                color="red")
+
+(plot1|plot2)/(plot3|plot4)
+@
 	  \item Find the probability that a randomly selected rat injected with the toxic substance
 	  lives between 1 and 3 days.
+	  <<>>=
+# P(x < 3) & P(x > 1) = 1-P(x<1)-P(x>3) = 1-P(x<=1)-(1-P(x>3))
+1-pgamma(q=1, shape=1, scale=1/0.2)-(1-pgamma(q=3, shape=1, scale=1/0.2))
+@
 	  \item Find the exact probability, using the exact sampling distribution, that two randomly selected rats injected with the toxic substance live  between 1 and 3 days on average.
+	  <<>>=
+# P(x < 3) & P(x > 1) = 1-P(x<1)-P(x>3) = 1-P(x<=1)-(1-P(x>3))
+1-pgamma(q=1, shape=2, scale=1/(2*0.2))-(1-pgamma(q=3, shape=2, scale=1/(2*0.2)))
+@
   \item Find the approximate probability, using the Central Limit Theorem, that two randomly 
 	  selected rats injected with the toxic substance live between 1 and 3 days on average. Comment
 	  on connection between the results and the assumptions of Central Limit Theorem.
@@ -289,7 +350,6 @@ than 13, $\mu>13$?
 <<>>=
 mu <- mean(uis$BECK)
 paste("The mean of BECK is", mean(mu))
-hist(uis$BECK)
 @
       \item What is the test statistics for this test?\\
       \textbf{Solution:} Mean would be our test statistics.
@@ -343,7 +403,8 @@ and interpret it in the context of this question.
 ci<-t.test(x=uis$BECK,
        alternative = "two.sided")
 
-paste("The confidence interval is [", ci$conf.int[1], ", ", ci$conf.int[2],"]", sep="")
+paste("The confidence interval is [", ci$conf.int[1], ", ", 
+      ci$conf.int[2],"]", sep="")
 @
     \end{enumerate}
 \item Is there a significant difference in the length of stay in treatment by 
