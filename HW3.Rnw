@@ -134,7 +134,7 @@ zip.pois <- function(par, data){
 }
 
 
-nleqslv(x = c(4.5,0.34), #best guess at parameter
+nleqslv(x = c(1,0), #best guess at parameter
         fn = zip.pois, 
         data = crab.dat$x)
 @
@@ -243,8 +243,21 @@ library(patchwork)
 ggdat <- data.frame(x1=seq(0, 100, 0.1))%>%
   mutate(y1 = dgamma(x=x1, shape=2, scale=1/(2*0.2)),
          y2 = dgamma(x=x1, shape=10, scale=1/(10*0.2)),
-         y3 = dgamma(x=x, shape=35, scale=1/(35*0.2)),
-         y4 = dgamma(x=x, shape=50, scale=1/(50*0.2)))
+         y3 = dgamma(x=x1, shape=35, scale=1/(35*0.2)),
+         y4 = dgamma(x=x1, shape=50, scale=1/(50*0.2)))
+
+
+
+mean(ggdat$x1[which(ggdat$y1>0.01)])
+mean(ggdat$x1[which(ggdat$y2>0.01)])
+mean(ggdat$x1[which(ggdat$y3>0.01)])
+mean(ggdat$x1[which(ggdat$y4>0.01)])
+
+sqrt(var(ggdat$x1[which(ggdat$y1>0.01)]))
+sqrt(var(ggdat$x1[which(ggdat$y2>0.01)]))
+sqrt(var(ggdat$x1[which(ggdat$y3>0.01)]))
+sqrt(var(ggdat$x1[which(ggdat$y4>0.01)]))
+
 
 plot1<-ggplot(ggdat, aes(x=x, y=y1))+
   geom_line()+
@@ -254,7 +267,7 @@ plot2<-ggplot(ggdat, aes(x=x, y=y2))+
   geom_line()+
   xlim(0,30)
 
-plot3<-ggplot(ggdat, aes(x=x, y=y2))+
+plot3<-ggplot(ggdat, aes(x=x, y=y3))+
   geom_line()+
   xlim(0,30)
 
@@ -269,24 +282,30 @@ plot4<-ggplot(ggdat, aes(x=x, y=y4))+
 	  distribution. Superimpose the approximate sampling distribution of $\bar{Y}$
 	  for $n=2$, $n=10$, $n=35$, and $n=50$.
 	  <<>>=
+#mean=shape*scale
+#var=shape*scale^2
+#TO-DO:
+#function(alpha, beta)
+
+
 plot1 <- plot1+
-  geom_function(fun=dnorm, args=list(mean=5, sd=1), 
+  geom_function(fun=dnorm, args=list(mean=2*(1/(10*0.2)), sd=sqrt(2*(1/(2*0.2)^2))), 
                 color="red")
 
 plot2 <- plot2+
-  geom_function(fun=dnorm, args=list(mean=5, sd=1), 
+  geom_function(fun=dnorm, args=list(mean=10*(1/(10*0.2)), sd=sqrt(10*(1/(10*0.2)^2))), 
                 color="red")
 
 plot3 <- plot3+
-  geom_function(fun=dnorm, args=list(mean=5, sd=1), 
+  geom_function(fun=dnorm, args=list(mean=35*(1/(35*0.2)), sd=sqrt(35*(1/(35*0.2)^2))), 
                 color="red")
 
 plot4 <- plot4+
-  geom_function(fun=dnorm, args=list(mean=5, sd=1), 
+  geom_function(fun=dnorm, args=list(mean=50*(1/(50*0.2)), sd=sqrt(50*(1/(50*0.2))^2)), 
                 color="red")
 
 (plot1|plot2)/(plot3|plot4)
-@
+ @
 	  \item Find the probability that a randomly selected rat injected with the toxic substance
 	  lives between 1 and 3 days.
 	  <<>>=
@@ -301,8 +320,15 @@ plot4 <- plot4+
   \item Find the approximate probability, using the Central Limit Theorem, that two randomly 
 	  selected rats injected with the toxic substance live between 1 and 3 days on average. Comment
 	  on connection between the results and the assumptions of Central Limit Theorem.
+<<>>=
+1-pnorm(1, mean=2*(1/(10*0.2)), sd=sqrt(2*(1/(2*0.2)^2)))-
+  (1-pnorm(3, mean=2*(1/(10*0.2)), sd=sqrt(2*(1/(2*0.2)^2))))
+@
 \item Under what conditions would the approximate probability calculated in 
 part (f) better match the exact probability in part (e)?
+<<>>=
+#bigger N
+@
   \end{enumerate}
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -415,7 +441,8 @@ H_{0}&:\mu_{0}=\mu{1}\\
 H_{a}&:\mu_{0}\neq\mu{1}
 \end{align*}
 <<>>=
-res <- t.test(uis$LEN.T ~ uis$SITE, data = uis, var.equal = TRUE)
+res <- t.test(uis$LEN.T ~ uis$SITE, 
+              data = uis, var.equal = F)
 res
 @
   \end{enumerate}
@@ -473,7 +500,8 @@ z2 <- -z1
 (sqrt(n)*z1*sqrt(p0*(1-p0)))/(n) + p0 #for upper bound
 (sqrt(n)*z2*sqrt(p0*(1-p0)))/(n) + p0 #for lower bound
 
-
+table(nodal$r)
+prop.test(20, 53, alternative="less")
 
 @
       \item What is the p value for this test?
@@ -501,6 +529,23 @@ ggplot(data=ggdat, aes(x=t, y=f))+
 @
     \end{enumerate}
     \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
+    <<>>=
+#H0: phat = 0.5
+#Ha: phat != 0.5
+nodal.c <- nodal %>%
+  mutate(sev = case_when(stage==1 ~ 1,
+                         grade==1 ~ 1,
+                         xray==1 ~ 1,
+                         TRUE ~ 0))%>%
+  group_by(sev, r)%>%
+  summarise(total = n())
+
+(nodal.c)
+
+prop.test(19, 20, 
+          p=0.5,
+          alternative = "two.sided")
+@
   \end{enumerate}
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

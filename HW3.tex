@@ -227,7 +227,7 @@ female crab is her number of satellites.
 \hlstd{\}}
 
 
-\hlkwd{nleqslv}\hlstd{(}\hlkwc{x} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{4.5}\hlstd{,}\hlnum{0.34}\hlstd{),} \hlcom{#best guess at parameter}
+\hlkwd{nleqslv}\hlstd{(}\hlkwc{x} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{),} \hlcom{#best guess at parameter}
         \hlkwc{fn} \hlstd{= zip.pois,}
         \hlkwc{data} \hlstd{= crab.dat}\hlopt{$}\hlstd{x)}
 \end{alltt}
@@ -236,7 +236,7 @@ female crab is her number of satellites.
 ## [1] 5.4633205 0.4550912
 ## 
 ## $fvec
-## [1] 3.674039e-11 3.937686e-10
+## [1] 1.244560e-11 1.407408e-10
 ## 
 ## $termcd
 ## [1] 1
@@ -248,13 +248,13 @@ female crab is her number of satellites.
 ## [1] 1 1
 ## 
 ## $nfcnt
-## [1] 7
+## [1] 35
 ## 
 ## $njcnt
 ## [1] 1
 ## 
 ## $iter
-## [1] 7
+## [1] 24
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -437,9 +437,59 @@ $n=50$.
 \hlstd{ggdat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{x1}\hlstd{=}\hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{100}\hlstd{,} \hlnum{0.1}\hlstd{))}\hlopt{%>%}
   \hlkwd{mutate}\hlstd{(}\hlkwc{y1} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)),}
          \hlkwc{y2} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{10}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),}
-         \hlkwc{y3} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{shape}\hlstd{=}\hlnum{35}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{35}\hlopt{*}\hlnum{0.2}\hlstd{)),}
-         \hlkwc{y4} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{shape}\hlstd{=}\hlnum{50}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{50}\hlopt{*}\hlnum{0.2}\hlstd{)))}
+         \hlkwc{y3} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{35}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{35}\hlopt{*}\hlnum{0.2}\hlstd{)),}
+         \hlkwc{y4} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{50}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{50}\hlopt{*}\hlnum{0.2}\hlstd{)))}
 
+
+
+\hlkwd{mean}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y1}\hlopt{>}\hlnum{0.01}\hlstd{)])}
+\end{alltt}
+\begin{verbatim}
+## [1] 6.75
+\end{verbatim}
+\begin{alltt}
+\hlkwd{mean}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y2}\hlopt{>}\hlnum{0.01}\hlstd{)])}
+\end{alltt}
+\begin{verbatim}
+## [1] 5.55
+\end{verbatim}
+\begin{alltt}
+\hlkwd{mean}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y3}\hlopt{>}\hlnum{0.01}\hlstd{)])}
+\end{alltt}
+\begin{verbatim}
+## [1] 5.2
+\end{verbatim}
+\begin{alltt}
+\hlkwd{mean}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y4}\hlopt{>}\hlnum{0.01}\hlstd{)])}
+\end{alltt}
+\begin{verbatim}
+## [1] 5.15
+\end{verbatim}
+\begin{alltt}
+\hlkwd{sqrt}\hlstd{(}\hlkwd{var}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y1}\hlopt{>}\hlnum{0.01}\hlstd{)]))}
+\end{alltt}
+\begin{verbatim}
+## [1] 3.882654
+\end{verbatim}
+\begin{alltt}
+\hlkwd{sqrt}\hlstd{(}\hlkwd{var}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y2}\hlopt{>}\hlnum{0.01}\hlstd{)]))}
+\end{alltt}
+\begin{verbatim}
+## [1] 2.266054
+\end{verbatim}
+\begin{alltt}
+\hlkwd{sqrt}\hlstd{(}\hlkwd{var}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y3}\hlopt{>}\hlnum{0.01}\hlstd{)]))}
+\end{alltt}
+\begin{verbatim}
+## [1] 1.371131
+\end{verbatim}
+\begin{alltt}
+\hlkwd{sqrt}\hlstd{(}\hlkwd{var}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y4}\hlopt{>}\hlnum{0.01}\hlstd{)]))}
+\end{alltt}
+\begin{verbatim}
+## [1] 1.169045
+\end{verbatim}
+\begin{alltt}
 \hlstd{plot1}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y1))}\hlopt{+}
   \hlkwd{geom_line}\hlstd{()}\hlopt{+}
   \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
@@ -448,7 +498,7 @@ $n=50$.
   \hlkwd{geom_line}\hlstd{()}\hlopt{+}
   \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
 
-\hlstd{plot3}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y2))}\hlopt{+}
+\hlstd{plot3}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y3))}\hlopt{+}
   \hlkwd{geom_line}\hlstd{()}\hlopt{+}
   \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
 
@@ -476,20 +526,26 @@ $n=50$.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
+\hlcom{#mean=shape*scale}
+\hlcom{#var=shape*scale^2}
+\hlcom{#TO-DO:}
+\hlcom{#function(alpha, beta)}
+
+
 \hlstd{plot1} \hlkwb{<-} \hlstd{plot1}\hlopt{+}
-  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{))),}
                 \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 
 \hlstd{plot2} \hlkwb{<-} \hlstd{plot2}\hlopt{+}
-  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{10}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{10}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{))),}
                 \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 
 \hlstd{plot3} \hlkwb{<-} \hlstd{plot3}\hlopt{+}
-  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{35}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{35}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{35}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{35}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{))),}
                 \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 
 \hlstd{plot4} \hlkwb{<-} \hlstd{plot4}\hlopt{+}
-  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{50}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{50}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{50}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{50}\hlopt{*}\hlnum{0.2}\hlstd{))}\hlopt{^}\hlnum{2}\hlstd{)),}
                 \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 
 \hlstd{(plot1}\hlopt{|}\hlstd{plot2)}\hlopt{/}\hlstd{(plot3}\hlopt{|}\hlstd{plot4)}
@@ -533,8 +589,26 @@ $n=50$.
   \item Find the approximate probability, using the Central Limit Theorem, that two randomly 
 	  selected rats injected with the toxic substance live between 1 and 3 days on average. Comment
 	  on connection between the results and the assumptions of Central Limit Theorem.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlnum{1}\hlopt{-}\hlkwd{pnorm}\hlstd{(}\hlnum{1}\hlstd{,} \hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{)))}\hlopt{-}
+  \hlstd{(}\hlnum{1}\hlopt{-}\hlkwd{pnorm}\hlstd{(}\hlnum{3}\hlstd{,} \hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{))))}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.2141962
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 \item Under what conditions would the approximate probability calculated in 
 part (f) better match the exact probability in part (e)?
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#bigger N}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
   \end{enumerate}
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -671,7 +745,7 @@ than 13, $\mu>13$?
            \hlkwc{size}\hlstd{=}\hlnum{3}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-18-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-20-1} 
 \end{knitrout}
       \item Report a 95\% confidence interval for the average BECK depression score
 and interpret it in the context of this question.
@@ -700,18 +774,19 @@ H_{a}&:\mu_{0}\neq\mu{1}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{res} \hlkwb{<-} \hlkwd{t.test}\hlstd{(uis}\hlopt{$}\hlstd{LEN.T} \hlopt{~} \hlstd{uis}\hlopt{$}\hlstd{SITE,} \hlkwc{data} \hlstd{= uis,} \hlkwc{var.equal} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlstd{res} \hlkwb{<-} \hlkwd{t.test}\hlstd{(uis}\hlopt{$}\hlstd{LEN.T} \hlopt{~} \hlstd{uis}\hlopt{$}\hlstd{SITE,}
+              \hlkwc{data} \hlstd{= uis,} \hlkwc{var.equal} \hlstd{= F)}
 \hlstd{res}
 \end{alltt}
 \begin{verbatim}
 ## 
-## 	Two Sample t-test
+## 	Welch Two Sample t-test
 ## 
 ## data:  uis$LEN.T by uis$SITE
-## t = -7.8446, df = 573, p-value = 2.137e-14
+## t = -6.138, df = 211.39, p-value = 4.072e-09
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  -65.03172 -38.98756
+##  -68.71283 -35.30646
 ## sample estimates:
 ## mean in group 0 mean in group 1 
 ##         84.9275        136.9371
@@ -795,6 +870,30 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
 \begin{verbatim}
 ## [1] 0.3621829
 \end{verbatim}
+\begin{alltt}
+\hlkwd{table}\hlstd{(nodal}\hlopt{$}\hlstd{r)}
+\end{alltt}
+\begin{verbatim}
+## 
+##  0  1 
+## 33 20
+\end{verbatim}
+\begin{alltt}
+\hlkwd{prop.test}\hlstd{(}\hlnum{20}\hlstd{,} \hlnum{53}\hlstd{,} \hlkwc{alternative}\hlstd{=}\hlstr{"less"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## 
+## 	1-sample proportions test with continuity correction
+## 
+## data:  20 out of 53, null probability 0.5
+## X-squared = 2.717, df = 1, p-value = 0.04964
+## alternative hypothesis: true p is less than 0.5
+## 95 percent confidence interval:
+##  0.0000000 0.4997615
+## sample estimates:
+##         p 
+## 0.3773585
+\end{verbatim}
 \end{kframe}
 \end{knitrout}
       \item What is the p value for this test?
@@ -827,7 +926,7 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
               \hlkwc{linetype}\hlstd{=}\hlstr{"dashed"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-25-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-27-1} 
 \end{knitrout}
       \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
 \begin{knitrout}
@@ -839,6 +938,54 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
 \end{knitrout}
     \end{enumerate}
     \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#H0: phat = 0.5}
+\hlcom{#Ha: phat != 0.5}
+\hlstd{nodal.c} \hlkwb{<-} \hlstd{nodal} \hlopt{%>%}
+  \hlkwd{mutate}\hlstd{(}\hlkwc{sev} \hlstd{=} \hlkwd{case_when}\hlstd{(stage}\hlopt{==}\hlnum{1} \hlopt{~} \hlnum{1}\hlstd{,}
+                     \hlstd{grade}\hlopt{==}\hlnum{1} \hlopt{~} \hlnum{1}\hlstd{,}
+                     \hlstd{xray}\hlopt{==}\hlnum{1} \hlopt{~} \hlnum{1}\hlstd{,}
+                     \hlnum{TRUE} \hlopt{~} \hlnum{0}\hlstd{))}\hlopt{%>%}
+  \hlkwd{group_by}\hlstd{(sev, r)}\hlopt{%>%}
+  \hlkwd{summarise}\hlstd{(}\hlkwc{total} \hlstd{=} \hlkwd{n}\hlstd{())}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# `summarise()` has grouped output by 'sev'. You can override using the `.groups` argument.}}\begin{alltt}
+\hlstd{(nodal.c)}
+\end{alltt}
+\begin{verbatim}
+## # A tibble: 4 x 3
+## # Groups:   sev [2]
+##     sev     r total
+##   <dbl> <dbl> <int>
+## 1     0     0    15
+## 2     0     1     1
+## 3     1     0    18
+## 4     1     1    19
+\end{verbatim}
+\begin{alltt}
+\hlkwd{prop.test}\hlstd{(}\hlnum{19}\hlstd{,} \hlnum{20}\hlstd{,}
+      \hlkwc{p}\hlstd{=}\hlnum{0.5}\hlstd{,}
+      \hlkwc{alternative} \hlstd{=} \hlstr{"two.sided"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## 
+## 	1-sample proportions test with continuity correction
+## 
+## data:  19 out of 20, null probability 0.5
+## X-squared = 14.45, df = 1, p-value = 0.0001439
+## alternative hypothesis: true p is not equal to 0.5
+## 95 percent confidence interval:
+##  0.7305563 0.9973844
+## sample estimates:
+##    p 
+## 0.95
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
   \end{enumerate}
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
