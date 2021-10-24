@@ -172,14 +172,13 @@ female crab is her number of satellites.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{library}\hlstd{(ggplot2)}
 \hlkwd{library}\hlstd{(tidyverse)}
 \end{alltt}
 
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# -- Attaching packages --------------------------------------- tidyverse 1.3.1 --}}
 
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# v tibble \ 3.1.2 \ \ \ \ v dplyr \ \ 1.0.7\\\#\# v tidyr \ \ 1.1.3 \ \ \ \ v stringr 1.4.0\\\#\# v readr \ \ 1.4.0 \ \ \ \ v forcats 0.5.1\\\#\# v purrr \ \ 0.3.4}}
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# v ggplot2 3.3.4 \ \ \ \ v purrr \ \ 0.3.4\\\#\# v tibble \ 3.1.2 \ \ \ \ v dplyr \ \ 1.0.7\\\#\# v tidyr \ \ 1.1.3 \ \ \ \ v stringr 1.4.0\\\#\# v readr \ \ 1.4.0 \ \ \ \ v forcats 0.5.1}}
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# -- Conflicts ------------------------------------------ tidyverse\_conflicts() --\\\#\# x dplyr::filter() masks stats::filter()\\\#\# x dplyr::lag() \ \ \ masks stats::lag()}}\begin{alltt}
 \hlstd{crab.dat.plot} \hlkwb{<-} \hlstd{crab.dat} \hlopt{%>%}
@@ -526,14 +525,8 @@ $n=50$.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{#mean=shape*scale}
-\hlcom{#var=shape*scale^2}
-\hlcom{#TO-DO:}
-\hlcom{#function(alpha, beta)}
-
-
 \hlstd{plot1} \hlkwb{<-} \hlstd{plot1}\hlopt{+}
-  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{))),}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{))),}
                 \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 
 \hlstd{plot2} \hlkwb{<-} \hlstd{plot2}\hlopt{+}
@@ -592,11 +585,11 @@ $n=50$.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlnum{1}\hlopt{-}\hlkwd{pnorm}\hlstd{(}\hlnum{1}\hlstd{,} \hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{)))}\hlopt{-}
-  \hlstd{(}\hlnum{1}\hlopt{-}\hlkwd{pnorm}\hlstd{(}\hlnum{3}\hlstd{,} \hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{))))}
+\hlnum{1}\hlopt{-}\hlkwd{pnorm}\hlstd{(}\hlnum{1}\hlstd{,} \hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{)))}\hlopt{-}
+  \hlstd{(}\hlnum{1}\hlopt{-}\hlkwd{pnorm}\hlstd{(}\hlnum{3}\hlstd{,} \hlkwc{mean}\hlstd{=}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)),} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{2}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)}\hlopt{^}\hlnum{2}\hlstd{))))}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.2141962
+## [1] 0.1568543
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -661,6 +654,7 @@ than 13, $\mu>13$?
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{mu} \hlkwb{<-} \hlkwd{mean}\hlstd{(uis}\hlopt{$}\hlstd{BECK)}
+\hlstd{mu0} \hlkwb{<-} \hlnum{13}
 \hlkwd{paste}\hlstd{(}\hlstr{"The mean of BECK is"}\hlstd{,} \hlkwd{mean}\hlstd{(mu))}
 \end{alltt}
 \begin{verbatim}
@@ -669,28 +663,9 @@ than 13, $\mu>13$?
 \end{kframe}
 \end{knitrout}
       \item What is the test statistics for this test?\\
-      \textbf{Solution:} Mean would be our test statistics.
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{mean}\hlstd{(uis}\hlopt{$}\hlstd{BECK)}
-\end{alltt}
-\begin{verbatim}
-## [1] 17.36743
-\end{verbatim}
-\begin{alltt}
-\hlkwd{median}\hlstd{(uis}\hlopt{$}\hlstd{BECK)}
-\end{alltt}
-\begin{verbatim}
-## [1] 17
-\end{verbatim}
-\begin{alltt}
-\hlcom{#Mean is basically equal to median, so we don't really care. c:}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
+      \textbf{Solution:} Since we are working with the means here, going for the T-score would be the most reasonable solution, so we are going to use T-test. 
       \item At what value of $\bar{X}$ does the rejection region start for $\alpha=0.05$?\\
-      
+
       \begin{align*}
 	se &= \frac{s}{\sqrt{n}} \tag{Formula for finding t-value}\\
 	t &= \frac{\bar{X}-\mu}{se} \tag{Formula for finding t-value}\\
@@ -701,10 +676,10 @@ than 13, $\mu>13$?
 \begin{alltt}
 \hlstd{n}\hlkwb{<-}\hlkwd{nrow}\hlstd{(uis)}
 \hlstd{se} \hlkwb{=} \hlkwd{sd}\hlstd{(uis}\hlopt{$}\hlstd{BECK)}\hlopt{/}\hlkwd{sqrt}\hlstd{(n)}
-\hlstd{(value}\hlkwb{<-}\hlstd{(}\hlkwd{qt}\hlstd{(}\hlnum{.95}\hlstd{, n}\hlopt{-}\hlnum{1}\hlstd{)}\hlopt{*}\hlstd{se)}\hlopt{+}\hlstd{mu)}
+\hlstd{(value}\hlkwb{<-}\hlstd{(}\hlkwd{qt}\hlstd{(}\hlnum{.95}\hlstd{, n}\hlopt{-}\hlnum{1}\hlstd{)}\hlopt{*}\hlstd{se)}\hlopt{+}\hlstd{mu0)}
 \end{alltt}
 \begin{verbatim}
-## [1] 18.00866
+## [1] 13.64123
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -716,7 +691,6 @@ than 13, $\mu>13$?
 \hlstd{tstat} \hlkwb{<-} \hlkwd{t.test}\hlstd{(}\hlkwc{x}\hlstd{=uis}\hlopt{$}\hlstd{BECK,}
        \hlkwc{mu} \hlstd{=} \hlnum{13}\hlstd{,}
        \hlkwc{alternative} \hlstd{=} \hlstr{"greater"}\hlstd{)}
-
 \hlstd{tstat}\hlopt{$}\hlstd{p.value}
 \end{alltt}
 \begin{verbatim}
@@ -724,7 +698,8 @@ than 13, $\mu>13$?
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-      \item Graph the results of this test.
+      \item Graph the results of this test.\\
+      \textbf{Solution:}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -745,10 +720,11 @@ than 13, $\mu>13$?
            \hlkwc{size}\hlstd{=}\hlnum{3}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-20-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-19-1} 
 \end{knitrout}
       \item Report a 95\% confidence interval for the average BECK depression score
-and interpret it in the context of this question.
+and interpret it in the context of this question.\\
+\textbf{Solution:}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -766,7 +742,7 @@ and interpret it in the context of this question.
     \end{enumerate}
 \item Is there a significant difference in the length of stay in treatment by 
     treatment site?\\
-\textbf{Solution:}
+\textbf{Solution: First, let's establish our hypothesis.}
 \begin{align*}
 H_{0}&:\mu_{0}=\mu{1}\\
 H_{a}&:\mu_{0}\neq\mu{1}
@@ -829,13 +805,13 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
       \item What is the null hypothesis for this test?\\
       \textbf{Solution:}  $H_{0}: \hat{P}=0.5$
       \item What is the alternative hypothesis for this test?\\
-      \textbf{Solution:}  $H_{0}: \hat{P}\neq0.5$
+      \textbf{Solution:}  $H_{0}: \hat{P}<0.5$
       \item What is the sample proportion of patients with nodal involvement for these data?\\
-      \textbf{Solution:} Something
+      \textbf{Solution:} It's 37\%!
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{table}\hlstd{(nodal}\hlopt{$}\hlstd{r)[}\hlnum{2}\hlstd{]}\hlopt{/}\hlkwd{nrow}\hlstd{(nodal)} \hlcom{#.37%}
+\hlkwd{table}\hlstd{(nodal}\hlopt{$}\hlstd{r)[}\hlnum{2}\hlstd{]}\hlopt{/}\hlkwd{nrow}\hlstd{(nodal)} \hlcom{#37%}
 \end{alltt}
 \begin{verbatim}
 ##         1 
@@ -845,7 +821,8 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
 \end{knitrout}
       \item What is the test statistics for this test?\\
       \textbf{Solution:} Z-value 
-      \item At what value of $\hat{P}$ does the rejection region start for $\alpha=0.05$?
+      \item At what value of $\hat{P}$ does the rejection region start for $\alpha=0.05$?\\
+      \textbf{Solution:}
       \begin{align*}
       z &= \frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}\\
       \hat{p} &= \frac{\sqrt{n}z\sqrt{p_{0}(1-p_{0})}}{n} + p_{0}
@@ -926,7 +903,7 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
               \hlkwc{linetype}\hlstd{=}\hlstr{"dashed"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-27-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-26-1} 
 \end{knitrout}
       \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
 \begin{knitrout}

@@ -91,7 +91,6 @@ female crab is her number of satellites.
 	\item Plot the data with the Poisson distribution fit with the MLE estimates. 
 	How well does the distribution fit the data? 
 	<<>>=
-	library(ggplot2)
 	library(tidyverse)
 	
 	crab.dat.plot <- crab.dat %>%
@@ -282,14 +281,8 @@ plot4<-ggplot(ggdat, aes(x=x, y=y4))+
 	  distribution. Superimpose the approximate sampling distribution of $\bar{Y}$
 	  for $n=2$, $n=10$, $n=35$, and $n=50$.
 	  <<>>=
-#mean=shape*scale
-#var=shape*scale^2
-#TO-DO:
-#function(alpha, beta)
-
-
 plot1 <- plot1+
-  geom_function(fun=dnorm, args=list(mean=2*(1/(10*0.2)), sd=sqrt(2*(1/(2*0.2)^2))), 
+  geom_function(fun=dnorm, args=list(mean=2*(1/(2*0.2)), sd=sqrt(2*(1/(2*0.2)^2))), 
                 color="red")
 
 plot2 <- plot2+
@@ -321,8 +314,8 @@ plot4 <- plot4+
 	  selected rats injected with the toxic substance live between 1 and 3 days on average. Comment
 	  on connection between the results and the assumptions of Central Limit Theorem.
 <<>>=
-1-pnorm(1, mean=2*(1/(10*0.2)), sd=sqrt(2*(1/(2*0.2)^2)))-
-  (1-pnorm(3, mean=2*(1/(10*0.2)), sd=sqrt(2*(1/(2*0.2)^2))))
+1-pnorm(1, mean=2*(1/(2*0.2)), sd=sqrt(2*(1/(2*0.2)^2)))-
+  (1-pnorm(3, mean=2*(1/(2*0.2)), sd=sqrt(2*(1/(2*0.2)^2))))
 @
 \item Under what conditions would the approximate probability calculated in 
 part (f) better match the exact probability in part (e)?
@@ -375,17 +368,13 @@ than 13, $\mu>13$?
       \textbf{Solution:}
 <<>>=
 mu <- mean(uis$BECK)
+mu0 <- 13
 paste("The mean of BECK is", mean(mu))
 @
       \item What is the test statistics for this test?\\
-      \textbf{Solution:} Mean would be our test statistics.
-<<>>=
-mean(uis$BECK)
-median(uis$BECK)
-#Mean is basically equal to median, so we don't really care. c:
-@
+      \textbf{Solution:} Since we are working with the means here, going for the T-score would be the most reasonable solution, so we are going to use T-test. 
       \item At what value of $\bar{X}$ does the rejection region start for $\alpha=0.05$?\\
-      
+
       \begin{align*}
 	se &= \frac{s}{\sqrt{n}} \tag{Formula for finding t-value}\\
 	t &= \frac{\bar{X}-\mu}{se} \tag{Formula for finding t-value}\\
@@ -394,7 +383,7 @@ median(uis$BECK)
 <<>>=
 n<-nrow(uis)
 se = sd(uis$BECK)/sqrt(n)
-(value<-(qt(.95, n-1)*se)+mu)
+(value<-(qt(.95, n-1)*se)+mu0)
 @
       \item What is the p value for this test?
 <<>>=
@@ -402,10 +391,10 @@ n=nrow(uis)
 tstat <- t.test(x=uis$BECK,
        mu = 13,         
        alternative = "greater")
-
 tstat$p.value
 @
-      \item Graph the results of this test.
+      \item Graph the results of this test.\\
+      \textbf{Solution:}
 <<>>=
 ggdat <- data.frame(t=seq(-5,5,length=500))%>%
   mutate(f=dt(x=t, df=n-1))
@@ -424,7 +413,8 @@ ggplot(data=ggdat, aes(x=t, y=f))+
            size=3)
 @
       \item Report a 95\% confidence interval for the average BECK depression score
-and interpret it in the context of this question.
+and interpret it in the context of this question.\\
+\textbf{Solution:}
 <<>>=
 ci<-t.test(x=uis$BECK,
        alternative = "two.sided")
@@ -435,7 +425,7 @@ paste("The confidence interval is [", ci$conf.int[1], ", ",
     \end{enumerate}
 \item Is there a significant difference in the length of stay in treatment by 
     treatment site?\\
-\textbf{Solution:}
+\textbf{Solution: First, let's establish our hypothesis.}
 \begin{align*}
 H_{0}&:\mu_{0}=\mu{1}\\
 H_{a}&:\mu_{0}\neq\mu{1}
@@ -477,15 +467,16 @@ data("nodal")
       \item What is the null hypothesis for this test?\\
       \textbf{Solution:}  $H_{0}: \hat{P}=0.5$
       \item What is the alternative hypothesis for this test?\\
-      \textbf{Solution:}  $H_{0}: \hat{P}\neq0.5$
+      \textbf{Solution:}  $H_{0}: \hat{P}<0.5$
       \item What is the sample proportion of patients with nodal involvement for these data?\\
-      \textbf{Solution:} Something
+      \textbf{Solution:} It's 37\%!
 <<>>=
-table(nodal$r)[2]/nrow(nodal) #.37%
+table(nodal$r)[2]/nrow(nodal) #37%
 @
       \item What is the test statistics for this test?\\
       \textbf{Solution:} Z-value 
-      \item At what value of $\hat{P}$ does the rejection region start for $\alpha=0.05$?
+      \item At what value of $\hat{P}$ does the rejection region start for $\alpha=0.05$?\\
+      \textbf{Solution:}
       \begin{align*}
       z &= \frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}\\
       \hat{p} &= \frac{\sqrt{n}z\sqrt{p_{0}(1-p_{0})}}{n} + p_{0}
@@ -502,7 +493,6 @@ z2 <- -z1
 
 table(nodal$r)
 prop.test(20, 53, alternative="less")
-
 @
       \item What is the p value for this test?
 <<>>=
@@ -512,39 +502,46 @@ zAns
       \item Graph the results of this test.
 <<>>=
 ggdat <- data.frame(t=seq(-5,5,length=500))%>%
-  mutate(f=dt(x=t, df=n-1))
+  mutate(f=dnorm(x=t, mean=0, sd=1))
 
 ggplot(data=ggdat, aes(x=t, y=f))+
   geom_line() +
   geom_hline(yintercept=0)+
-  geom_point(aes(x=zAns, y=0), color="red")+
-  geom_vline(xintercept=qt(p=0.975, df=n-1),
+   geom_point(aes(x=zAns, y=0), color="red")+
+  geom_vline(xintercept=qnorm(p=0.05, mean=0, sd=1),
               linetype="dashed", color="red")+
-  geom_vline(xintercept=qt(p=0.025, df=n-1),
-              linetype="dashed", color="red")
+  annotate("text", x=1.2*qnorm(p=0.05, mean=0, sd=1), y=0.30,
+           label="Rejection Region", angle="90",
+           color="red")+
+  annotate("text", zAns+1.1, y=0.01,
+           label="p-value = 0.04964",
+           size=3)
 @
       \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
 <<>>=
-#no clue
+prop.test(20, 53, alternative="two.sided")
 @
     \end{enumerate}
     \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
     <<>>=
-#H0: phat = 0.5
-#Ha: phat != 0.5
+#H0: p1-p2 = 0
+#Ha: p1-p2 != 0
 nodal.c <- nodal %>%
   mutate(sev = case_when(stage==1 ~ 1,
                          grade==1 ~ 1,
                          xray==1 ~ 1,
                          TRUE ~ 0))%>%
-  group_by(sev, r)%>%
-  summarise(total = n())
+#non severe
+x1<-1
+n1<-16
+(p.hat1<- x1/n1)
 
-(nodal.c)
+#severe
+x2<-19
+n2<-37
 
-prop.test(19, 20, 
-          p=0.5,
-          alternative = "two.sided")
+prop.test(x=c(x1,x2),
+          n=c(n1,n2))
 @
   \end{enumerate}
 \end{enumerate}
