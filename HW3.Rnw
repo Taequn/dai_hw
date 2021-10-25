@@ -47,9 +47,10 @@ female crab is her number of satellites.
  	crab is distributed Poisson$(\lambda)$ where the parameter $\lambda$ is of interest.
 	\begin{enumerate}
 	\item Calculate the method of moments estimator for $\lambda$.\\
-	\textbf{Solution:}
-	<<>>=
+	\textbf{Solution:} We'll be using a nleqslv package \cite{nlesqlv} to solve a non-linear equation to find $\lambda$! Hopefully, you're excited!
+	<<warning=FALSE, alert=FALSE, message=FALSE>>=
 	library(nleqslv)
+	library(tidyverse)
 	#put data into the dataframe
 	crab.dat <- data.frame(x=c(rep(0,62), rep(1, 16), rep(2, 9), rep(3, 19),
 	                           rep(4, 19), rep(5, 15), rep(6, 13), rep(7, 4),
@@ -64,35 +65,34 @@ female crab is her number of satellites.
 	  sample.mean <- mean(data)
 	  return(sample.mean-population.mean)
 	}
-	
-	answer <- nleqslv(x=1,      
+	#Solve the equation
+	answer <- nleqslv(x=1, #worst guess :3
         fn = momfunc,
         data=crab.dat$x)
 	
-	answer$x
+	paste("Lambda is ~", answer$x, sep="")
 	@
 	\item Find the maximum likelihood estimator for $\lambda$.\\
-	\textbf{Solution:}
+	\textbf{Solution:} For this, we'll use a \texttt{dpois()} function from the base R package and \texttt{optim()} function to find MLE for our Poisson distribution.
 	<<>>=
 	LLfunc <- function(par, data){
 	  answer <- sum(dpois(x=data, lambda = par, log=T))
-	  -answer
+	  -answer #most likely
 	}
 
-	answer <- optim(par = 1,
+	answer <- optim(par = 1, #worst guess c:
       fn = LLfunc,   
       data = crab.dat$x, 
       method = "Brent",  
       lower = 0,         
       upper = 100) 
 	
-	answer
+	paste("Parameter:",answer$par)
 	@
+	So $\lambda$ is 2.97! It will help us when plotting the data with fitted Poisson distribution over it!
 	\item Plot the data with the Poisson distribution fit with the MLE estimates. 
 	How well does the distribution fit the data? 
-	<<>>=
-	library(tidyverse)
-	
+<<p1plot1, warning=FALSE, alert=FALSE, message=FALSE, eval=FALSE>>=
 	crab.dat.plot <- crab.dat %>%
 	  mutate(f = dpois(x=x, lambda=2.977011))
 	
@@ -106,8 +106,22 @@ female crab is her number of satellites.
 	                     labels = as.character(sats), breaks = sats)+
 	  labs(y="Density",
 	       title="Number of observations per satellite",
-	       subtitle="Fitting Poisson distribution")
+	       subtitle="Poisson distribution. Lambda=2.977")+
+  theme_bw()+
+  geom_hline(yintercept=0)
 	@
+	
+	\begin{figure}[H]
+\begin{center}
+<<echo=FALSE, fig.dim=c(6,3.5), message=FALSE, warning=FALSE, error=FALSE>>=
+<<p1plot1>>
+@
+	\caption{Poisson model fitted to our data}
+\label{plot3} %we can now reference plot1
+\end{center}
+\end{figure}
+As you might notice, our model doesn't really fit the data that neatly — it doesn't take into account the number of zeros that we have in our dataset. This leads the distribution to either underestimate or overestimate values!
+
 	\item Let's try another distribution - the zero-inflated Poisson distribution. 
 	Now, it is believed that the distribution of the number of satellites for a 
 	female crab is distributed Poisson$_0(\lambda,\sigma)$ where the parameters 
@@ -117,13 +131,15 @@ female crab is her number of satellites.
 	 + (\sigma+(1-\sigma)e^{-\lambda}) I(x=0)\]
 	 \textbf{Hint:} Noticing that this is a function of the Poisson PMF and
 	 rewriting it will help remarkably.\\
-	 \textbf{Solution:}
-	 	<<>>=
+	 \textbf{Solution:} Let's use our favorite nleqslv package \cite{nlesqlv} to calculate the parameters that we are looking for for our zero-inflated Poisson model. We need to find $\lambda$ and $\sigma$!\\
+	 When calculating E(X) for ZIP, I noticed that the only difference between the regular Poisson distribution and this one is an additional $(1-\sigma)$, so I assumed that E(X)=$(1-\sigma)\lambda$. While I managed to calculate it, I struggle with Var(X), so I found \cite{b_minerb} discussion on StackOverflow really helpful for my calculations!
+<<>>=
 zip.pois <- function(par, data){
   lambda <- par[1]
   pi <- par[2]
   
-  EX1 <- (1-pi)*lambda
+  #Applying my knowledge
+  EX1 <- (1-pi)*lambda 
   EX2 <- (1-pi)*(lambda^2+lambda)
   
   xbar1 <- mean(data)
@@ -132,17 +148,23 @@ zip.pois <- function(par, data){
   c(EX1-xbar1, EX2-xbar2)
 }
 
-
-nleqslv(x = c(1,0), #best guess at parameter
+#solving
+answerZIP<-nleqslv(x = c(1,0), #best guess at parameter
         fn = zip.pois, 
         data = crab.dat$x)
-@
-Let's graph the results to see how accurate this approach was! 
 
-<<>>=
+paste("Lambda:",answerZIP$x[1],"Sigma:",answerZIP$x[2])
+@
+
+It's impossible to assess how accurate we are in our calculations without graphing the results. I am going to use \texttt{dzipois()} from VGAM package \cite{VGAM}. 
+
+\begin{figure}[H]
+\begin{center}
+<<plot2, fig.dim=c(6,3.5), message=FALSE, warning=FALSE, error=FALSE>>=
 library("VGAM")
 crab.dat.zim <- crab.dat %>%
 	  mutate(f = dzipois(x=x, lambda=5.4633205, pstr0=0.4550912))
+#make a true density function
 
 ggplot(crab.dat.zim, aes(x=x))+
 	  geom_histogram(aes(y=..density..), fill="deepskyblue2", color="black", 
@@ -152,29 +174,34 @@ ggplot(crab.dat.zim, aes(x=x))+
 	                     labels = as.character(sats), breaks = sats)+
 	  labs(y="Density",
 	       title="Number of observations per satellite",
-	       subtitle="Fitting Poisson distribution")
+	       subtitle="ZIP distribution. Lambda=5.4633205, Sigma=0.4550912")+
+  theme_bw()+
+  geom_hline(yintercept=0)
 @
-It would appear that MOM inflates zero too much, and underestimates the other values.
+\caption{ZIP with parameters that we calculated via MOM}
+\label{plot2}
+\end{center}
+\end{figure}
+It would seem MOM inflates zero values a bit too much and underestimates the other values. I would suggest that doing MLE would be a superior way of calculating parameters! Let's see if I am correct about it.
 
-	 \item Find the maximum likelihood estimator for $\lambda$ and $\sigma$.
+	 \item Find the maximum likelihood estimator for $\lambda$ and $\sigma$.\\
+	 \textbf{Solution:}
 	<<>>=
-library(Rfast)
-zip.mle(crab.dat$x)
-
 #MLE
-dpois.ll<-function(par, data, neg=T){
+dpois.ll<-function(par, data){
   lambda <- par[1]
   pi <- par[2]
   ll <- sum(dzipois(x=data, lambda=lambda, pstr0=pi, log=T))
-  ifelse(neg, -ll, ll)
+  -ll
 }
-
-optim(par = c(1,0),
+answerZIPll<-optim(par = c(1,0),
       fn = dpois.ll,
       data=crab.dat$x)
+paste("Lambda:",answerZIPll$par[1],"Sigma:",answerZIPll$par[2])
   @
 	\item Plot a histogram of the data with the zero-inflated Poisson distribution
-	fit with the MLE estimates. How well does the distribution fit the data?
+	fit with the MLE estimates. How well does the distribution fit the data?\\
+	\textbf{Solution:} Now, let's assess if we were right about the ultimate superiority of MLE compared to MOM. Yet again, we're going to use VGAM package \cite{VGAM} to create a true density function.
 	<<>>=
 crab.dat.zim <- crab.dat %>%
 	  mutate(f = dzipois(x=x, lambda=4.5770923, pstr0=0.3496381))
@@ -187,8 +214,12 @@ ggplot(crab.dat.zim, aes(x=x))+
 	                     labels = as.character(sats), breaks = sats)+
 	  labs(y="Density",
 	       title="Number of observations per satellite",
-	       subtitle="Fitting Poisson distribution")
+	       subtitle="ZIP distribution. Lambda=4.5770923, sigma=0.3496381") +
+  theme_bw()+
+  geom_hline(yintercept=0)
 @
+Now, that's definitely something to write home about! While I don't really like that this model undervalues some values (look at 1, for example), but it does really well when it comes to zero and most other values! \\
+\textbf{Case closed:} MLE is superior! 
 	\end{enumerate}
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -212,15 +243,27 @@ ggplot(crab.dat.zim, aes(x=x))+
   var(X) &= \frac{1}{\lambda^2}\tag*{\textbf{[Population Variance]}}\\
   \end{align*}
 	\begin{enumerate}
-	  \item Plot the exponential$(\lambda = 1/5)$ population distribution.
-	  <<>>=
+	  \item Plot the exponential$(\lambda = 1/5)$ population distribution.\\
+	  \textbf{Solution}: I am going to use ggplot2 package \cite{ggplot} to plot this exponential distribution.
+\begin{figure}[H]
+\begin{center}
+<<fig.dim=c(6,3.5)>>=
 x<-seq(0, 100, 0.1)
 y<-dexp(x, 1/5)
 ggdat<-data.frame(x,y)
 
 ggplot(ggdat, aes(x=x, y=y))+
-  geom_line()
+  geom_line(color="dark red")+
+  labs(y="Density",
+  x="x",
+  title="Exponential distribution",
+  subtitle="Lambda=0.2")+
+  theme_bw()
 @
+\caption{Exponential distribution via \cite{ggplot}}
+\label{p2plot1}
+\end{center}
+\end{figure}
 	  \item Mathematical statisticians can show the exact sampling distributions 
 	  of $\bar{Y}$ are gamma; i.e.,
 	  \[\bar{Y} \sim \textrm{gamma}(\alpha=n,\beta=\frac{1}{n\lambda}).\]
@@ -236,51 +279,73 @@ var(X) = \alpha \beta^2 \tag*{\textbf{[Population Variance]}}
 You can ask \texttt{R} for the gamma distribution PDF using 
 \texttt{dgamma(x=x,shape=alpha,scale=beta)}.
 Plot the exact sampling distribution for $n=2$, $n=10$, $n=35$, and
-$n=50$.
-<<>>=
+$n=50$.\\
+\textbf{Solution:} Now, in order to plot our gamme distribution, we need to use \texttt{dgamma()} function within the base R package! Let's see how the graphs are going to vary based on the changes to $n$!
+<<p2plot3, pfig.dim=c(6,3.5), warning=FALSE, eval=FALSE>>=
 library(patchwork)
+#plotting distributions based on the info you provided!
 ggdat <- data.frame(x1=seq(0, 100, 0.1))%>%
-  mutate(y1 = dgamma(x=x1, shape=2, scale=1/(2*0.2)),
+  mutate(y1 = dgamma(x=x1, shape=2, scale=1/(2*0.2)), 
          y2 = dgamma(x=x1, shape=10, scale=1/(10*0.2)),
          y3 = dgamma(x=x1, shape=35, scale=1/(35*0.2)),
          y4 = dgamma(x=x1, shape=50, scale=1/(50*0.2)))
 
-
-
-mean(ggdat$x1[which(ggdat$y1>0.01)])
-mean(ggdat$x1[which(ggdat$y2>0.01)])
-mean(ggdat$x1[which(ggdat$y3>0.01)])
-mean(ggdat$x1[which(ggdat$y4>0.01)])
-
-sqrt(var(ggdat$x1[which(ggdat$y1>0.01)]))
-sqrt(var(ggdat$x1[which(ggdat$y2>0.01)]))
-sqrt(var(ggdat$x1[which(ggdat$y3>0.01)]))
-sqrt(var(ggdat$x1[which(ggdat$y4>0.01)]))
-
-
+#You would ask me:
+#Chris, but why do you limit your x from 0 to 30.
+#And I would tell you:
+#Because it's cool! 
 plot1<-ggplot(ggdat, aes(x=x, y=y1))+
-  geom_line()+
-  xlim(0,30)
+  geom_line(color="green")+
+  xlim(0,30)+
+  theme_bw()+
+  labs(y="Density",
+       title="Gamma distribution for n = 2",
+       subtitle="Alpha = 2, Beta = 2.5")
 
 plot2<-ggplot(ggdat, aes(x=x, y=y2))+
-  geom_line()+
-  xlim(0,30)
+  geom_line(color="dark red")+
+  xlim(0,30)+
+  theme_bw()+
+  labs(y="Density",
+       title="Gamma distribution for n = 10",
+       subtitle="Alpha = 10, Beta = 0.5")
 
 plot3<-ggplot(ggdat, aes(x=x, y=y3))+
-  geom_line()+
-  xlim(0,30)
+  geom_line(color="blue")+
+  xlim(0,30)+
+  theme_bw()+
+  labs(y="Density",
+       title="Gamma distribution for n = 35",
+       subtitle="Alpha = 35, Beta = 0.14")
 
 plot4<-ggplot(ggdat, aes(x=x, y=y4))+
-  geom_line()+
-  xlim(0,30)
+  geom_line(color="black")+
+  xlim(0,30)+
+  theme_bw()+
+  labs(y="Density",
+       title="Gamma distribution for n = 50",
+       subtitle="Alpha = 50, Beta = 0.1")
 
 (plot1|plot2)/(plot3|plot4)
 @
+
+\begin{figure}[H]
+\begin{center}
+<<echo=FALSE, fig.dim=c(6,3.5), message=FALSE, warning=FALSE, error=FALSE>>=
+<<p2plot3>>
+@
+\caption{Gamma distributions for $n=2$, $n=10$, $n=35$, and $n=50$}
+\label{p2plot3}
+\end{center}
+\end{figure}
+
+It seems to me that the bigger $n$ gets, the more normal gamma distribution becomes (yet another proof that CLT is correct!). To prove that I am correct, I am going to superimpose a normal distribution function.
 	  \item The Central Limit Theorem says that as $n$ increases, the sampling 
 	  distribution of $\bar{Y}$ can be well approximated with a Gaussian 
 	  distribution. Superimpose the approximate sampling distribution of $\bar{Y}$
-	  for $n=2$, $n=10$, $n=35$, and $n=50$.
-	  <<>>=
+	  for $n=2$, $n=10$, $n=35$, and $n=50$.\\
+\textbf{Solution:} So in order to apply CLT here, we need to keep in mind that $\mu_{\bar{x}}=\mu_{x}$ and $\sigma_{\bar{x}}=sqrt(var(\bar{X}))$. Let's apply it when plotting!
+<<p2plot4, pfig.dim=c(6,3.5), warning=FALSE, eval=FALSE>>=
 plot1 <- plot1+
   geom_function(fun=dnorm, args=list(mean=2*(1/(2*0.2)), sd=sqrt(2*(1/(2*0.2)^2))), 
                 color="red")
@@ -299,29 +364,41 @@ plot4 <- plot4+
 
 (plot1|plot2)/(plot3|plot4)
  @
+\begin{figure}[H]
+\begin{center}
+<<echo=FALSE, fig.dim=c(6,3.5), message=FALSE, warning=FALSE, error=FALSE>>=
+<<p2plot4>>
+@
+\caption{Gamma distributions for $n=2$, $n=10$, $n=35$, and $n=50$ with superimposed Gaussian distribution}
+\label{p2plot4}
+\end{center}
+\end{figure}
 	  \item Find the probability that a randomly selected rat injected with the toxic substance
-	  lives between 1 and 3 days.
+	  lives between 1 and 3 days.\\
+	  \textbf{Solution:}
 	  <<>>=
-# P(x < 3) & P(x > 1) = 1-P(x<1)-P(x>3) = 1-P(x<=1)-(1-P(x>3))
+# 1-P(x<=1)-(1-P(x>3))
 1-pgamma(q=1, shape=1, scale=1/0.2)-(1-pgamma(q=3, shape=1, scale=1/0.2))
 @
-	  \item Find the exact probability, using the exact sampling distribution, that two randomly selected rats injected with the toxic substance live  between 1 and 3 days on average.
+	  \item Find the exact probability, using the exact sampling distribution, that two randomly selected rats injected with the toxic substance live  between 1 and 3 days on average.\\
+	  \textbf{Solution:}
 	  <<>>=
-# P(x < 3) & P(x > 1) = 1-P(x<1)-P(x>3) = 1-P(x<=1)-(1-P(x>3))
-1-pgamma(q=1, shape=2, scale=1/(2*0.2))-(1-pgamma(q=3, shape=2, scale=1/(2*0.2)))
+# 1-P(x<=1)-(1-P(x>3))
+1-pgamma(q=1, shape=2, scale=1/(2*0.2))-
+  (1-pgamma(q=3, shape=2, scale=1/(2*0.2)))
 @
   \item Find the approximate probability, using the Central Limit Theorem, that two randomly 
 	  selected rats injected with the toxic substance live between 1 and 3 days on average. Comment
-	  on connection between the results and the assumptions of Central Limit Theorem.
+	  on connection between the results and the assumptions of Central Limit Theorem.\\
+	  \textbf{Solution:}
 <<>>=
 1-pnorm(1, mean=2*(1/(2*0.2)), sd=sqrt(2*(1/(2*0.2)^2)))-
   (1-pnorm(3, mean=2*(1/(2*0.2)), sd=sqrt(2*(1/(2*0.2)^2))))
 @
+We can see that the probability is far off. The explanation is simple: here, we are using only two rats (so $n=2$), and one of CLT assumptions is that $n>30$. So no wonder that the result is off! 
 \item Under what conditions would the approximate probability calculated in 
-part (f) better match the exact probability in part (e)?
-<<>>=
-#bigger N
-@
+part (f) better match the exact probability in part (e)?\\
+\textbf{Solution:} According to the CLT, the bigger the $n$, the closer our AG distribution will get to the actual distribution.
   \end{enumerate}
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -391,11 +468,13 @@ n=nrow(uis)
 tstat <- t.test(x=uis$BECK,
        mu = 13,         
        alternative = "greater")
-tstat$p.value
+paste("P-value:", tstat$p.value)
 @
       \item Graph the results of this test.\\
-      \textbf{Solution:}
-<<>>=
+      \textbf{Solution:} Since we are using T-test for this, let's create a T-distribution with 574 degrees of freedom. Then, we are going to map our rejection region onto the graph (it's going to be at $t=1.647513$). Finally, I am going to put our value on X-axis and assess how far away it is from the rejection region (keep in mind the p-value — we already have in mind enough evidence to reject null hypothesis).
+\begin{figure}[H]
+\begin{center}
+<<p3plot1, fig.dim=c(6,3.5), message=FALSE>>=
 ggdat <- data.frame(t=seq(-5,5,length=500))%>%
   mutate(f=dt(x=t, df=n-1))
 
@@ -410,8 +489,16 @@ ggplot(data=ggdat, aes(x=t, y=f))+
            color="red")+
   annotate("text", x=tstat$statistic-1.8, y=0.02,
            label="P-value = 7.41 * 10^-27",
-           size=3)
+           size=3)+
+  theme_bw()+
+  labs(x="T",
+       y="Density",
+       title="T-distribution to assess a null hypothesis")
 @
+\caption{T-distribution with 574 degrees of freedom}
+\label{p3plot1}
+\end{center}
+\end{figure}
       \item Report a 95\% confidence interval for the average BECK depression score
 and interpret it in the context of this question.\\
 \textbf{Solution:}
@@ -425,16 +512,17 @@ paste("The confidence interval is [", ci$conf.int[1], ", ",
     \end{enumerate}
 \item Is there a significant difference in the length of stay in treatment by 
     treatment site?\\
-\textbf{Solution: First, let's establish our hypothesis.}
+\textbf{Solution:} First, let's establish our hypothesis.
 \begin{align*}
-H_{0}&:\mu_{0}=\mu{1}\\
-H_{a}&:\mu_{0}\neq\mu{1}
+H_{0}&:\mu_{0}-\mu{1}=0\\
+H_{a}&:\mu_{0}-\mu{1}\neq0
 \end{align*}
 <<>>=
 res <- t.test(uis$LEN.T ~ uis$SITE, 
               data = uis, var.equal = F)
-res
+paste("P-value:",res$p.value)
 @
+Based on this two-sample t-test, we have enough evidence to suggest that (with 95\% confidence) our true mean is not equal to 0! Therefore, we have statistically significant results showing that there's a difference in the length of stay between two sites!
   \end{enumerate}
   \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -474,32 +562,35 @@ data("nodal")
 table(nodal$r)[2]/nrow(nodal) #37%
 @
       \item What is the test statistics for this test?\\
-      \textbf{Solution:} Z-value 
+      \textbf{Solution:} We are working with proportions, so we are going to use a Z-value.
       \item At what value of $\hat{P}$ does the rejection region start for $\alpha=0.05$?\\
       \textbf{Solution:}
       \begin{align*}
       z &= \frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}\\
       \hat{p} &= \frac{\sqrt{n}z\sqrt{p_{0}(1-p_{0})}}{n} + p_{0}
       \end{align*}
+      
 <<>>=
 p0 <- 0.5
 phat <- table(nodal$r)[2]/nrow(nodal)
 n <- nrow(nodal)
-z1 <- qt(.975, n-1)
-z2 <- -z1
+z1 <- qnorm(.05, 0, 1)
 
-(sqrt(n)*z1*sqrt(p0*(1-p0)))/(n) + p0 #for upper bound
-(sqrt(n)*z2*sqrt(p0*(1-p0)))/(n) + p0 #for lower bound
+answerProp<-(sqrt(n)*z1*sqrt(p0*(1-p0)))/(n) + p0
 
-table(nodal$r)
-prop.test(20, 53, alternative="less")
+paste("Rejection starts with", answerProp, "but we already have a lower number:",
+      table(nodal$r)[2]/nrow(nodal))
 @
+Having a number lower than the rejection region is the first sign that true $\hat{P}$ is not 0.5!
       \item What is the p value for this test?
 <<>>=
-zAns <- (phat-p0)/sqrt((p0*(1-p0))/(n))
-zAns
+answerPropTest <- prop.test(20, 53, p=0.5, alternative="less")
+paste("P-value:",answerPropTest$p.value)
 @
+We have enough evidence to reject null hypothesis in favor of the alternative!
       \item Graph the results of this test.
+\begin{figure}[H]
+\begin{center}
 <<>>=
 ggdat <- data.frame(t=seq(-5,5,length=500))%>%
   mutate(f=dnorm(x=t, mean=0, sd=1))
@@ -507,42 +598,58 @@ ggdat <- data.frame(t=seq(-5,5,length=500))%>%
 ggplot(data=ggdat, aes(x=t, y=f))+
   geom_line() +
   geom_hline(yintercept=0)+
-   geom_point(aes(x=zAns, y=0), color="red")+
+   geom_point(aes(x=-sqrt(answerPropTest$statistic), y=0), color="red")+
   geom_vline(xintercept=qnorm(p=0.05, mean=0, sd=1),
               linetype="dashed", color="red")+
   annotate("text", x=1.2*qnorm(p=0.05, mean=0, sd=1), y=0.30,
            label="Rejection Region", angle="90",
            color="red")+
-  annotate("text", zAns+1.1, y=0.01,
+  annotate("text", -sqrt(answerPropTest$statistic), y=0.01,
            label="p-value = 0.04964",
-           size=3)
+           size=3)+
+  theme_bw()+
+  labs(x="X",
+       y="Density",
+       title="Z-test for proportion")
 @
+\caption{Results of Z-test}
+\label{p4plot1}
+\end{center}
+\end{figure}
+It's one of those times when it's really hard to tell by the graph alone if the dot within the rejection region or outside of it. So, as I've done before, we can use \texttt{prop.test()} in order to check the p-value!
       \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
 <<>>=
-prop.test(20, 53, alternative="two.sided")
+propCI<-prop.test(20, 53, alternative="two.sided")
+paste("Confidence interval is", propCI$conf.int)
 @
     \end{enumerate}
-    \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
-    <<>>=
+    \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?\\
+    \textbf{Solution:}\\
+    $H_{0}:\hat{p}_{1}-\hat{p}_{2}=0$\\
+    $H_{0}:\hat{p}_{1}-\hat{p}_{2}\neq0$
+<<>>=
 #H0: p1-p2 = 0
 #Ha: p1-p2 != 0
 nodal.c <- nodal %>%
   mutate(sev = case_when(stage==1 ~ 1,
                          grade==1 ~ 1,
                          xray==1 ~ 1,
-                         TRUE ~ 0))%>%
+                         TRUE ~ 0)) #put all severity indicators into one
 #non severe
 x1<-1
 n1<-16
-(p.hat1<- x1/n1)
+#Non severe: 1 involvement out of 16 cases
 
 #severe
 x2<-19
 n2<-37
+#Severe: 19 involvements out of 37 cases
 
-prop.test(x=c(x1,x2),
+finalProp <- prop.test(x=c(x1,x2),
           n=c(n1,n2))
+paste("P-value of two-sample test is", finalProp$p.value)
 @
+Based on the p-value, we have enough evidence to reject the null hypothesis in favor of alternative. Therefore, there's actually a significant in the nodal involvement in patients with severity indicators. 
   \end{enumerate}
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -554,7 +661,127 @@ prop.test(x=c(x1,x2),
 \noindent \textbf{Bonus 1:} Use the gganimate package \citep{gganimate} for \texttt{R} to create a plot that demonstrates the Central Limit Theorem for the Poisson, Binomial, Exponential, and Gaussian distributions in a $2\times 2$ grid as \href{https://moodle.colgate.edu/mod/forum/discuss.php?d=127682}{here}.\\
 
 Note that we can't add GIFs to the .pdf document, so you'll have to email me your code for this part. You'll find \texttt{  transition\_time()} helpful for creating your animation and \texttt{gganimate\_save()} helpful for saving your animation. \vspace{2em}\\
+\textbf{Solution:}
+<<eval=FALSE>>=
+library(gganimate)
+library(gifski)
+library(transformr)
 
+#Binom
+#E(X)=np
+#Var(X)=np*(1-p)
+#100*0.5*(1-0.5)
+
+final1.df <- c()
+for(num in 1:150){
+  generate <- rnorm(num, mean=num*0.3, sd=sqrt(num*0.3*0.7))
+  num.df <- data.frame(values=generate, n=num)
+  final1.df<-bind_rows(final1.df, num.df)
+}
+p1<-ggplot(final1.df, aes(x=values))+
+  geom_histogram(aes(y=..density..),
+                 color="white",
+                 fill="dark red")+
+  geom_function(fun=dnorm, args=list(mean=num*0.3, sd=sqrt(num*0.3*0.7)),
+                color="red")+ 
+  labs(x="X",
+       y="Density",
+       title="Poisson distribution",
+       subtitle="Lambda: 5")+
+  transition_states(n,
+                    transition_length = 1,
+                    state_length = 1)+
+  ease_aes('sine-in-out')
+
+anim1 <- animate(p1, renderer = gifski_renderer())
+anim_save("poisson.gif", anim1)
+
+
+#Poisson
+#E(X)=lambda
+#Var(X)=lambda
+final2.df <- c()
+for(num in 1:150){
+  generate <- rnorm(num, mean=5, sd=sqrt(5))
+  num.df <- data.frame(values=generate, n=num)
+  final2.df<-bind_rows(final2.df, num.df)
+}
+p2<-ggplot(final2.df, aes(x=values))+
+  geom_histogram(aes(y=..density..),
+                 color="white",
+                 fill="dark red")+
+  geom_function(fun=dnorm, args=list(mean=5, sd=sqrt(5)),
+                color="red")+ 
+  labs(x="X",
+       y="Density",
+       title="Poisson distribution",
+       subtitle="Lambda: 5")+
+  transition_states(n,
+                    transition_length = 1,
+                    state_length = 1)+
+  ease_aes('sine-in-out')
+
+anim2 <- animate(p2, renderer = gifski_renderer())
+anim_save("poisson.gif", anim2)
+
+
+#Exponential
+#E(X)=1/lambda
+#Var(X)=1/lambda^2
+
+final3.df <- c()
+for(num in 1:150){
+  generate <- rnorm(num, mean=1/5, sd=sqrt(1/25))
+  num.df <- data.frame(values=generate, n=num)
+  final3.df<-bind_rows(final3.df, num.df)
+}
+
+p3<-ggplot(final3.df, aes(x=values))+
+  geom_histogram(aes(y=..density..),
+                 color="white",
+                 fill="dark red")+
+  geom_function(fun=dnorm, args=list(mean=1/5, sd=sqrt(1/25)),
+                color="red")+
+  labs(x="X",
+       y="Density",
+       title="Exponential distribution",
+       subtitle="Lambda: 5")+
+transition_states(n,
+                    transition_length = 1,
+                    state_length = 1)+
+  ease_aes('sine-in-out')
+
+anim3 <- animate(p3, renderer = gifski_renderer())
+anim_save("exponential.gif", anim3)
+
+#Normal
+#E(X)=mu
+#Var(X)=sigma^2
+final4.df <- c()
+for(num in 1:150){
+  generate <- rnorm(num, mean=0, sd=1)
+  num.df <- data.frame(values=generate, n=num)
+  final4.df<-bind_rows(final4.df, num.df)
+}
+p4<-ggplot(final4.df, aes(x=values))+
+  geom_histogram(aes(y=..density..),
+                 color="white",
+                 fill="dark red")+
+  geom_function(fun=dnorm, args=list(mean=1/5, sd=sqrt(1/25)),
+                color="red")+
+  labs(x="X",
+       y="Density",
+       title="Normal distribution",
+       subtitle="Mean: 0, SD: 1")+
+  transition_states(n,
+                    transition_length = 1,
+                    state_length = 1)+
+  ease_aes('sine-in-out')
+
+anim4 <- animate(p4, renderer = gifski_renderer())
+anim_save("normal.gif", anim4)
+
+@
 
 \noindent \textbf{Bonus 2:} Compare the effectiveness of the $t$-interval with the bootstrap interval. In a loop, generate 1000 datasets, evaluate a $t$ and bootstrapping confidence interval for each set of data, and track whether you've captured the true population mean. An effective answer here would evaluate this several times varying sample size and the data generating distribution.
 

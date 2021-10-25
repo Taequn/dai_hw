@@ -98,11 +98,12 @@ female crab is her number of satellites.
  	crab is distributed Poisson$(\lambda)$ where the parameter $\lambda$ is of interest.
 	\begin{enumerate}
 	\item Calculate the method of moments estimator for $\lambda$.\\
-	\textbf{Solution:}
+	\textbf{Solution:} We'll be using a nleqslv package \cite{nlesqlv} to solve a non-linear equation to find $\lambda$! Hopefully, you're excited!
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{library}\hlstd{(nleqslv)}
+\hlkwd{library}\hlstd{(tidyverse)}
 \hlcom{#put data into the dataframe}
 \hlstd{crab.dat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{x}\hlstd{=}\hlkwd{c}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{62}\hlstd{),} \hlkwd{rep}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{16}\hlstd{),} \hlkwd{rep}\hlstd{(}\hlnum{2}\hlstd{,} \hlnum{9}\hlstd{),} \hlkwd{rep}\hlstd{(}\hlnum{3}\hlstd{,} \hlnum{19}\hlstd{),}
                            \hlkwd{rep}\hlstd{(}\hlnum{4}\hlstd{,} \hlnum{19}\hlstd{),} \hlkwd{rep}\hlstd{(}\hlnum{5}\hlstd{,} \hlnum{15}\hlstd{),} \hlkwd{rep}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{13}\hlstd{),} \hlkwd{rep}\hlstd{(}\hlnum{7}\hlstd{,} \hlnum{4}\hlstd{),}
@@ -117,88 +118,80 @@ female crab is her number of satellites.
   \hlstd{sample.mean} \hlkwb{<-} \hlkwd{mean}\hlstd{(data)}
   \hlkwd{return}\hlstd{(sample.mean}\hlopt{-}\hlstd{population.mean)}
 \hlstd{\}}
-
-\hlstd{answer} \hlkwb{<-} \hlkwd{nleqslv}\hlstd{(}\hlkwc{x}\hlstd{=}\hlnum{1}\hlstd{,}
+\hlcom{#Solve the equation}
+\hlstd{answer} \hlkwb{<-} \hlkwd{nleqslv}\hlstd{(}\hlkwc{x}\hlstd{=}\hlnum{1}\hlstd{,} \hlcom{#worst guess :3}
         \hlkwc{fn} \hlstd{= momfunc,}
         \hlkwc{data}\hlstd{=crab.dat}\hlopt{$}\hlstd{x)}
 
-\hlstd{answer}\hlopt{$}\hlstd{x}
+\hlkwd{paste}\hlstd{(}\hlstr{"Lambda is ~"}\hlstd{, answer}\hlopt{$}\hlstd{x,} \hlkwc{sep}\hlstd{=}\hlstr{""}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 2.977011
+## [1] "Lambda is ~2.97701149425287"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 	\item Find the maximum likelihood estimator for $\lambda$.\\
-	\textbf{Solution:}
+	\textbf{Solution:} For this, we'll use a \texttt{dpois()} function from the base R package and \texttt{optim()} function to find MLE for our Poisson distribution.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{LLfunc} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{par}\hlstd{,} \hlkwc{data}\hlstd{)\{}
   \hlstd{answer} \hlkwb{<-} \hlkwd{sum}\hlstd{(}\hlkwd{dpois}\hlstd{(}\hlkwc{x}\hlstd{=data,} \hlkwc{lambda} \hlstd{= par,} \hlkwc{log}\hlstd{=T))}
-  \hlopt{-}\hlstd{answer}
+  \hlopt{-}\hlstd{answer} \hlcom{#most likely}
 \hlstd{\}}
 
-\hlstd{answer} \hlkwb{<-} \hlkwd{optim}\hlstd{(}\hlkwc{par} \hlstd{=} \hlnum{1}\hlstd{,}
+\hlstd{answer} \hlkwb{<-} \hlkwd{optim}\hlstd{(}\hlkwc{par} \hlstd{=} \hlnum{1}\hlstd{,} \hlcom{#worst guess c:}
       \hlkwc{fn} \hlstd{= LLfunc,}
       \hlkwc{data} \hlstd{= crab.dat}\hlopt{$}\hlstd{x,}
       \hlkwc{method} \hlstd{=} \hlstr{"Brent"}\hlstd{,}
       \hlkwc{lower} \hlstd{=} \hlnum{0}\hlstd{,}
       \hlkwc{upper} \hlstd{=} \hlnum{100}\hlstd{)}
 
-\hlstd{answer}
+\hlkwd{paste}\hlstd{(}\hlstr{"Parameter:"}\hlstd{,answer}\hlopt{$}\hlstd{par)}
 \end{alltt}
 \begin{verbatim}
-## $par
-## [1] 2.977011
-## 
-## $value
-## [1] 505.4901
-## 
-## $counts
-## function gradient 
-##       NA       NA 
-## 
-## $convergence
-## [1] 0
-## 
-## $message
-## NULL
+## [1] "Parameter: 2.9770114489889"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+	So $\lambda$ is 2.97! It will help us when plotting the data with fitted Poisson distribution over it!
 	\item Plot the data with the Poisson distribution fit with the MLE estimates. 
 	How well does the distribution fit the data? 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{library}\hlstd{(tidyverse)}
-\end{alltt}
+        \hlstd{crab.dat.plot} \hlkwb{<-} \hlstd{crab.dat} \hlopt{%>%}
+          \hlkwd{mutate}\hlstd{(}\hlkwc{f} \hlstd{=} \hlkwd{dpois}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{lambda}\hlstd{=}\hlnum{2.977011}\hlstd{))}
 
 
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# -- Attaching packages --------------------------------------- tidyverse 1.3.1 --}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# v ggplot2 3.3.4 \ \ \ \ v purrr \ \ 0.3.4\\\#\# v tibble \ 3.1.2 \ \ \ \ v dplyr \ \ 1.0.7\\\#\# v tidyr \ \ 1.1.3 \ \ \ \ v stringr 1.4.0\\\#\# v readr \ \ 1.4.0 \ \ \ \ v forcats 0.5.1}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# -- Conflicts ------------------------------------------ tidyverse\_conflicts() --\\\#\# x dplyr::filter() masks stats::filter()\\\#\# x dplyr::lag() \ \ \ masks stats::lag()}}\begin{alltt}
-\hlstd{crab.dat.plot} \hlkwb{<-} \hlstd{crab.dat} \hlopt{%>%}
-  \hlkwd{mutate}\hlstd{(}\hlkwc{f} \hlstd{=} \hlkwd{dpois}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{lambda}\hlstd{=}\hlnum{2.977011}\hlstd{))}
-
-
-\hlstd{sats} \hlkwb{<-} \hlnum{0}\hlopt{:}\hlnum{15}
-\hlkwd{ggplot}\hlstd{(crab.dat.plot,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x))}\hlopt{+}
-  \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{fill}\hlstd{=}\hlstr{"deepskyblue2"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"black"}\hlstd{,}
-                 \hlkwc{binwidth}\hlstd{=}\hlnum{1}\hlstd{)}\hlopt{+}
-  \hlkwd{geom_linerange}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{ymin}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{ymax}\hlstd{=f),} \hlkwc{color}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
-  \hlkwd{scale_x_continuous}\hlstd{(}\hlstr{"Number of satellites"}\hlstd{,}
-                     \hlkwc{labels} \hlstd{=} \hlkwd{as.character}\hlstd{(sats),} \hlkwc{breaks} \hlstd{= sats)}\hlopt{+}
-  \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
-       \hlkwc{title}\hlstd{=}\hlstr{"Number of observations per satellite"}\hlstd{,}
-       \hlkwc{subtitle}\hlstd{=}\hlstr{"Fitting Poisson distribution"}\hlstd{)}
+        \hlstd{sats} \hlkwb{<-} \hlnum{0}\hlopt{:}\hlnum{15}
+        \hlkwd{ggplot}\hlstd{(crab.dat.plot,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x))}\hlopt{+}
+          \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{fill}\hlstd{=}\hlstr{"deepskyblue2"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"black"}\hlstd{,}
+                         \hlkwc{binwidth}\hlstd{=}\hlnum{1}\hlstd{)}\hlopt{+}
+          \hlkwd{geom_linerange}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{ymin}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{ymax}\hlstd{=f),} \hlkwc{color}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
+          \hlkwd{scale_x_continuous}\hlstd{(}\hlstr{"Number of satellites"}\hlstd{,}
+                             \hlkwc{labels} \hlstd{=} \hlkwd{as.character}\hlstd{(sats),} \hlkwc{breaks} \hlstd{= sats)}\hlopt{+}
+          \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+               \hlkwc{title}\hlstd{=}\hlstr{"Number of observations per satellite"}\hlstd{,}
+               \hlkwc{subtitle}\hlstd{=}\hlstr{"Poisson distribution. Lambda=2.977"}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{geom_hline}\hlstd{(}\hlkwc{yintercept}\hlstd{=}\hlnum{0}\hlstd{)}
 \end{alltt}
 \end{kframe}
+\end{knitrout}
+	
+	\begin{figure}[H]
+\begin{center}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-3-1} 
 \end{knitrout}
+	\caption{Poisson model fitted to our data}
+\label{plot3} %we can now reference plot1
+\end{center}
+\end{figure}
+As you might notice, our model doesn't really fit the data that neatly — it doesn't take into account the number of zeros that we have in our dataset. This leads the distribution to either underestimate or overestimate values!
+
 	\item Let's try another distribution - the zero-inflated Poisson distribution. 
 	Now, it is believed that the distribution of the number of satellites for a 
 	female crab is distributed Poisson$_0(\lambda,\sigma)$ where the parameters 
@@ -208,7 +201,8 @@ female crab is her number of satellites.
 	 + (\sigma+(1-\sigma)e^{-\lambda}) I(x=0)\]
 	 \textbf{Hint:} Noticing that this is a function of the Poisson PMF and
 	 rewriting it will help remarkably.\\
-	 \textbf{Solution:}
+	 \textbf{Solution:} Let's use our favorite nleqslv package \cite{nlesqlv} to calculate the parameters that we are looking for for our zero-inflated Poisson model. We need to find $\lambda$ and $\sigma$!\\
+	 When calculating E(X) for ZIP, I noticed that the only difference between the regular Poisson distribution and this one is an additional $(1-\sigma)$, so I assumed that E(X)=$(1-\sigma)\lambda$. While I managed to calculate it, I struggle with Var(X), so I found \cite{b_minerb} discussion on StackOverflow really helpful for my calculations!
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -216,6 +210,7 @@ female crab is her number of satellites.
   \hlstd{lambda} \hlkwb{<-} \hlstd{par[}\hlnum{1}\hlstd{]}
   \hlstd{pi} \hlkwb{<-} \hlstd{par[}\hlnum{2}\hlstd{]}
 
+  \hlcom{#Applying my knowledge}
   \hlstd{EX1} \hlkwb{<-} \hlstd{(}\hlnum{1}\hlopt{-}\hlstd{pi)}\hlopt{*}\hlstd{lambda}
   \hlstd{EX2} \hlkwb{<-} \hlstd{(}\hlnum{1}\hlopt{-}\hlstd{pi)}\hlopt{*}\hlstd{(lambda}\hlopt{^}\hlnum{2}\hlopt{+}\hlstd{lambda)}
 
@@ -225,56 +220,30 @@ female crab is her number of satellites.
   \hlkwd{c}\hlstd{(EX1}\hlopt{-}\hlstd{xbar1, EX2}\hlopt{-}\hlstd{xbar2)}
 \hlstd{\}}
 
-
-\hlkwd{nleqslv}\hlstd{(}\hlkwc{x} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{),} \hlcom{#best guess at parameter}
+\hlcom{#solving}
+\hlstd{answerZIP}\hlkwb{<-}\hlkwd{nleqslv}\hlstd{(}\hlkwc{x} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{),} \hlcom{#best guess at parameter}
         \hlkwc{fn} \hlstd{= zip.pois,}
         \hlkwc{data} \hlstd{= crab.dat}\hlopt{$}\hlstd{x)}
+
+\hlkwd{paste}\hlstd{(}\hlstr{"Lambda:"}\hlstd{,answerZIP}\hlopt{$}\hlstd{x[}\hlnum{1}\hlstd{],}\hlstr{"Sigma:"}\hlstd{,answerZIP}\hlopt{$}\hlstd{x[}\hlnum{2}\hlstd{])}
 \end{alltt}
 \begin{verbatim}
-## $x
-## [1] 5.4633205 0.4550912
-## 
-## $fvec
-## [1] 1.244560e-11 1.407408e-10
-## 
-## $termcd
-## [1] 1
-## 
-## $message
-## [1] "Function criterion near zero"
-## 
-## $scalex
-## [1] 1 1
-## 
-## $nfcnt
-## [1] 35
-## 
-## $njcnt
-## [1] 1
-## 
-## $iter
-## [1] 24
+## [1] "Lambda: 5.46332046334072 Sigma: 0.455091182323775"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-Let's graph the results to see how accurate this approach was! 
 
+It's impossible to assess how accurate we are in our calculations without graphing the results. I am going to use \texttt{dzipois()} from VGAM package \cite{VGAM}. 
+
+\begin{figure}[H]
+\begin{center}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{library}\hlstd{(}\hlstr{"VGAM"}\hlstd{)}
-\end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: stats4}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: splines}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'VGAM'}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:tidyr':\\\#\# \\\#\# \ \ \ \ fill}}\begin{alltt}
 \hlstd{crab.dat.zim} \hlkwb{<-} \hlstd{crab.dat} \hlopt{%>%}
           \hlkwd{mutate}\hlstd{(}\hlkwc{f} \hlstd{=} \hlkwd{dzipois}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{lambda}\hlstd{=}\hlnum{5.4633205}\hlstd{,} \hlkwc{pstr0}\hlstd{=}\hlnum{0.4550912}\hlstd{))}
+\hlcom{#make a true density function}
 
 \hlkwd{ggplot}\hlstd{(crab.dat.zim,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x))}\hlopt{+}
           \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{fill}\hlstd{=}\hlstr{"deepskyblue2"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"black"}\hlstd{,}
@@ -284,79 +253,44 @@ Let's graph the results to see how accurate this approach was!
                              \hlkwc{labels} \hlstd{=} \hlkwd{as.character}\hlstd{(sats),} \hlkwc{breaks} \hlstd{= sats)}\hlopt{+}
           \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
                \hlkwc{title}\hlstd{=}\hlstr{"Number of observations per satellite"}\hlstd{,}
-               \hlkwc{subtitle}\hlstd{=}\hlstr{"Fitting Poisson distribution"}\hlstd{)}
+               \hlkwc{subtitle}\hlstd{=}\hlstr{"ZIP distribution. Lambda=5.4633205, Sigma=0.4550912"}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{geom_hline}\hlstd{(}\hlkwc{yintercept}\hlstd{=}\hlnum{0}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-5-1} 
+\includegraphics[width=\maxwidth]{figure/plot2-1} 
 \end{knitrout}
-It would appear that MOM inflates zero too much, and underestimates the other values.
+\caption{ZIP with parameters that we calculated via MOM}
+\label{plot2}
+\end{center}
+\end{figure}
+It would seem MOM inflates zero values a bit too much and underestimates the other values. I would suggest that doing MLE would be a superior way of calculating parameters! Let's see if I am correct about it.
 
-	 \item Find the maximum likelihood estimator for $\lambda$ and $\sigma$.
+	 \item Find the maximum likelihood estimator for $\lambda$ and $\sigma$.\\
+	 \textbf{Solution:}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{library}\hlstd{(Rfast)}
-\end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: Rcpp}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: RcppZiggurat}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'Rfast'}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:VGAM':\\\#\# \\\#\# \ \ \ \ Rank}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:dplyr':\\\#\# \\\#\# \ \ \ \ nth}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:purrr':\\\#\# \\\#\# \ \ \ \ is\_integer, transpose}}\begin{alltt}
-\hlkwd{zip.mle}\hlstd{(crab.dat}\hlopt{$}\hlstd{x)}
-\end{alltt}
-\begin{verbatim}
-## $iters
-## [1] 5
-## 
-## $loglik
-## [1] -389.4734
-## 
-## $param
-##    lambda        pi 
-## 4.5774500 0.3496354
-\end{verbatim}
-\begin{alltt}
 \hlcom{#MLE}
-\hlstd{dpois.ll}\hlkwb{<-}\hlkwa{function}\hlstd{(}\hlkwc{par}\hlstd{,} \hlkwc{data}\hlstd{,} \hlkwc{neg}\hlstd{=T)\{}
+\hlstd{dpois.ll}\hlkwb{<-}\hlkwa{function}\hlstd{(}\hlkwc{par}\hlstd{,} \hlkwc{data}\hlstd{)\{}
   \hlstd{lambda} \hlkwb{<-} \hlstd{par[}\hlnum{1}\hlstd{]}
   \hlstd{pi} \hlkwb{<-} \hlstd{par[}\hlnum{2}\hlstd{]}
   \hlstd{ll} \hlkwb{<-} \hlkwd{sum}\hlstd{(}\hlkwd{dzipois}\hlstd{(}\hlkwc{x}\hlstd{=data,} \hlkwc{lambda}\hlstd{=lambda,} \hlkwc{pstr0}\hlstd{=pi,} \hlkwc{log}\hlstd{=T))}
-  \hlkwd{ifelse}\hlstd{(neg,} \hlopt{-}\hlstd{ll, ll)}
+  \hlopt{-}\hlstd{ll}
 \hlstd{\}}
-
-\hlkwd{optim}\hlstd{(}\hlkwc{par} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{),}
+\hlstd{answerZIPll}\hlkwb{<-}\hlkwd{optim}\hlstd{(}\hlkwc{par} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{),}
       \hlkwc{fn} \hlstd{= dpois.ll,}
       \hlkwc{data}\hlstd{=crab.dat}\hlopt{$}\hlstd{x)}
+\hlkwd{paste}\hlstd{(}\hlstr{"Lambda:"}\hlstd{,answerZIPll}\hlopt{$}\hlstd{par[}\hlnum{1}\hlstd{],}\hlstr{"Sigma:"}\hlstd{,answerZIPll}\hlopt{$}\hlstd{par[}\hlnum{2}\hlstd{])}
 \end{alltt}
 \begin{verbatim}
-## $par
-## [1] 4.5770922 0.3496381
-## 
-## $value
-## [1] 389.4734
-## 
-## $counts
-## function gradient 
-##       71       NA 
-## 
-## $convergence
-## [1] 0
-## 
-## $message
-## NULL
+## [1] "Lambda: 4.57709217492355 Sigma: 0.349638133663682"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 	\item Plot a histogram of the data with the zero-inflated Poisson distribution
-	fit with the MLE estimates. How well does the distribution fit the data?
+	fit with the MLE estimates. How well does the distribution fit the data?\\
+	\textbf{Solution:} Now, let's assess if we were right about the ultimate superiority of MLE compared to MOM. Yet again, we're going to use VGAM package \cite{VGAM} to create a true density function.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -371,11 +305,15 @@ It would appear that MOM inflates zero too much, and underestimates the other va
                      \hlkwc{labels} \hlstd{=} \hlkwd{as.character}\hlstd{(sats),} \hlkwc{breaks} \hlstd{= sats)}\hlopt{+}
   \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
        \hlkwc{title}\hlstd{=}\hlstr{"Number of observations per satellite"}\hlstd{,}
-       \hlkwc{subtitle}\hlstd{=}\hlstr{"Fitting Poisson distribution"}\hlstd{)}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"ZIP distribution. Lambda=4.5770923, sigma=0.3496381"}\hlstd{)} \hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{geom_hline}\hlstd{(}\hlkwc{yintercept}\hlstd{=}\hlnum{0}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-7-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-6-1} 
 \end{knitrout}
+Now, that's definitely something to write home about! While I don't really like that this model undervalues some values (look at 1, for example), but it does really well when it comes to zero and most other values! \\
+\textbf{Case closed:} MLE is superior! 
 	\end{enumerate}
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -399,7 +337,10 @@ It would appear that MOM inflates zero too much, and underestimates the other va
   var(X) &= \frac{1}{\lambda^2}\tag*{\textbf{[Population Variance]}}\\
   \end{align*}
 	\begin{enumerate}
-	  \item Plot the exponential$(\lambda = 1/5)$ population distribution.
+	  \item Plot the exponential$(\lambda = 1/5)$ population distribution.\\
+	  \textbf{Solution}: I am going to use ggplot2 package \cite{ggplot} to plot this exponential distribution.
+\begin{figure}[H]
+\begin{center}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -408,11 +349,20 @@ It would appear that MOM inflates zero too much, and underestimates the other va
 \hlstd{ggdat}\hlkwb{<-}\hlkwd{data.frame}\hlstd{(x,y)}
 
 \hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y))}\hlopt{+}
-  \hlkwd{geom_line}\hlstd{()}
+  \hlkwd{geom_line}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+  \hlkwc{x}\hlstd{=}\hlstr{"x"}\hlstd{,}
+  \hlkwc{title}\hlstd{=}\hlstr{"Exponential distribution"}\hlstd{,}
+  \hlkwc{subtitle}\hlstd{=}\hlstr{"Lambda=0.2"}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-7-1} 
 \end{knitrout}
+\caption{Exponential distribution via \cite{ggplot}}
+\label{p2plot1}
+\end{center}
+\end{figure}
 	  \item Mathematical statisticians can show the exact sampling distributions 
 	  of $\bar{Y}$ are gamma; i.e.,
 	  \[\bar{Y} \sim \textrm{gamma}(\alpha=n,\beta=\frac{1}{n\lambda}).\]
@@ -428,100 +378,77 @@ var(X) = \alpha \beta^2 \tag*{\textbf{[Population Variance]}}
 You can ask \texttt{R} for the gamma distribution PDF using 
 \texttt{dgamma(x=x,shape=alpha,scale=beta)}.
 Plot the exact sampling distribution for $n=2$, $n=10$, $n=35$, and
-$n=50$.
+$n=50$.\\
+\textbf{Solution:} Now, in order to plot our gamme distribution, we need to use \texttt{dgamma()} function within the base R package! Let's see how the graphs are going to vary based on the changes to $n$!
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{library}\hlstd{(patchwork)}
+\hlcom{#plotting distributions based on the info you provided!}
 \hlstd{ggdat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{x1}\hlstd{=}\hlkwd{seq}\hlstd{(}\hlnum{0}\hlstd{,} \hlnum{100}\hlstd{,} \hlnum{0.1}\hlstd{))}\hlopt{%>%}
   \hlkwd{mutate}\hlstd{(}\hlkwc{y1} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)),}
          \hlkwc{y2} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{10}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{10}\hlopt{*}\hlnum{0.2}\hlstd{)),}
          \hlkwc{y3} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{35}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{35}\hlopt{*}\hlnum{0.2}\hlstd{)),}
          \hlkwc{y4} \hlstd{=} \hlkwd{dgamma}\hlstd{(}\hlkwc{x}\hlstd{=x1,} \hlkwc{shape}\hlstd{=}\hlnum{50}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{50}\hlopt{*}\hlnum{0.2}\hlstd{)))}
 
-
-
-\hlkwd{mean}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y1}\hlopt{>}\hlnum{0.01}\hlstd{)])}
-\end{alltt}
-\begin{verbatim}
-## [1] 6.75
-\end{verbatim}
-\begin{alltt}
-\hlkwd{mean}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y2}\hlopt{>}\hlnum{0.01}\hlstd{)])}
-\end{alltt}
-\begin{verbatim}
-## [1] 5.55
-\end{verbatim}
-\begin{alltt}
-\hlkwd{mean}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y3}\hlopt{>}\hlnum{0.01}\hlstd{)])}
-\end{alltt}
-\begin{verbatim}
-## [1] 5.2
-\end{verbatim}
-\begin{alltt}
-\hlkwd{mean}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y4}\hlopt{>}\hlnum{0.01}\hlstd{)])}
-\end{alltt}
-\begin{verbatim}
-## [1] 5.15
-\end{verbatim}
-\begin{alltt}
-\hlkwd{sqrt}\hlstd{(}\hlkwd{var}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y1}\hlopt{>}\hlnum{0.01}\hlstd{)]))}
-\end{alltt}
-\begin{verbatim}
-## [1] 3.882654
-\end{verbatim}
-\begin{alltt}
-\hlkwd{sqrt}\hlstd{(}\hlkwd{var}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y2}\hlopt{>}\hlnum{0.01}\hlstd{)]))}
-\end{alltt}
-\begin{verbatim}
-## [1] 2.266054
-\end{verbatim}
-\begin{alltt}
-\hlkwd{sqrt}\hlstd{(}\hlkwd{var}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y3}\hlopt{>}\hlnum{0.01}\hlstd{)]))}
-\end{alltt}
-\begin{verbatim}
-## [1] 1.371131
-\end{verbatim}
-\begin{alltt}
-\hlkwd{sqrt}\hlstd{(}\hlkwd{var}\hlstd{(ggdat}\hlopt{$}\hlstd{x1[}\hlkwd{which}\hlstd{(ggdat}\hlopt{$}\hlstd{y4}\hlopt{>}\hlnum{0.01}\hlstd{)]))}
-\end{alltt}
-\begin{verbatim}
-## [1] 1.169045
-\end{verbatim}
-\begin{alltt}
+\hlcom{#You would ask me:}
+\hlcom{#Chris, but why do you limit your x from 0 to 30.}
+\hlcom{#And I would tell you:}
+\hlcom{#Because it's cool! }
 \hlstd{plot1}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y1))}\hlopt{+}
-  \hlkwd{geom_line}\hlstd{()}\hlopt{+}
-  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
+  \hlkwd{geom_line}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"green"}\hlstd{)}\hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Gamma distribution for n = 2"}\hlstd{,}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"Alpha = 2, Beta = 2.5"}\hlstd{)}
 
 \hlstd{plot2}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y2))}\hlopt{+}
-  \hlkwd{geom_line}\hlstd{()}\hlopt{+}
-  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
+  \hlkwd{geom_line}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Gamma distribution for n = 10"}\hlstd{,}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"Alpha = 10, Beta = 0.5"}\hlstd{)}
 
 \hlstd{plot3}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y3))}\hlopt{+}
-  \hlkwd{geom_line}\hlstd{()}\hlopt{+}
-  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
+  \hlkwd{geom_line}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"blue"}\hlstd{)}\hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Gamma distribution for n = 35"}\hlstd{,}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"Alpha = 35, Beta = 0.14"}\hlstd{)}
 
 \hlstd{plot4}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y4))}\hlopt{+}
-  \hlkwd{geom_line}\hlstd{()}\hlopt{+}
-  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}
+  \hlkwd{geom_line}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"black"}\hlstd{)}\hlopt{+}
+  \hlkwd{xlim}\hlstd{(}\hlnum{0}\hlstd{,}\hlnum{30}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Gamma distribution for n = 50"}\hlstd{,}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"Alpha = 50, Beta = 0.1"}\hlstd{)}
 
 \hlstd{(plot1}\hlopt{|}\hlstd{plot2)}\hlopt{/}\hlstd{(plot3}\hlopt{|}\hlstd{plot4)}
 \end{alltt}
-
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
+\end{kframe}
 \end{knitrout}
+
+\begin{figure}[H]
+\begin{center}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
+\end{knitrout}
+\caption{Gamma distributions for $n=2$, $n=10$, $n=35$, and $n=50$}
+\label{p2plot3}
+\end{center}
+\end{figure}
+
+It seems to me that the bigger $n$ gets, the more normal gamma distribution becomes (yet another proof that CLT is correct!). To prove that I am correct, I am going to superimpose a normal distribution function.
 	  \item The Central Limit Theorem says that as $n$ increases, the sampling 
 	  distribution of $\bar{Y}$ can be well approximated with a Gaussian 
 	  distribution. Superimpose the approximate sampling distribution of $\bar{Y}$
-	  for $n=2$, $n=10$, $n=35$, and $n=50$.
+	  for $n=2$, $n=10$, $n=35$, and $n=50$.\\
+\textbf{Solution:} So in order to apply CLT here, we need to keep in mind that $\mu_{\bar{x}}=\mu_{x}$ and $\sigma_{\bar{x}}=sqrt(var(\bar{X}))$. Let's apply it when plotting!
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -543,23 +470,25 @@ $n=50$.
 
 \hlstd{(plot1}\hlopt{|}\hlstd{plot2)}\hlopt{/}\hlstd{(plot3}\hlopt{|}\hlstd{plot4)}
 \end{alltt}
-
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: Removed 700 row(s) containing missing values (geom\_path).}}\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-10-1} 
+\end{kframe}
 \end{knitrout}
+\begin{figure}[H]
+\begin{center}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
+\end{knitrout}
+\caption{Gamma distributions for $n=2$, $n=10$, $n=35$, and $n=50$ with superimposed Gaussian distribution}
+\label{p2plot4}
+\end{center}
+\end{figure}
 	  \item Find the probability that a randomly selected rat injected with the toxic substance
-	  lives between 1 and 3 days.
+	  lives between 1 and 3 days.\\
+	  \textbf{Solution:}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# P(x < 3) & P(x > 1) = 1-P(x<1)-P(x>3) = 1-P(x<=1)-(1-P(x>3))}
+\hlcom{# 1-P(x<=1)-(1-P(x>3))}
 \hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlnum{0.2}\hlstd{)}\hlopt{-}\hlstd{(}\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{3}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlnum{0.2}\hlstd{))}
 \end{alltt}
 \begin{verbatim}
@@ -567,12 +496,14 @@ $n=50$.
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-	  \item Find the exact probability, using the exact sampling distribution, that two randomly selected rats injected with the toxic substance live  between 1 and 3 days on average.
+	  \item Find the exact probability, using the exact sampling distribution, that two randomly selected rats injected with the toxic substance live  between 1 and 3 days on average.\\
+	  \textbf{Solution:}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# P(x < 3) & P(x > 1) = 1-P(x<1)-P(x>3) = 1-P(x<=1)-(1-P(x>3))}
-\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{))}\hlopt{-}\hlstd{(}\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{3}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)))}
+\hlcom{# 1-P(x<=1)-(1-P(x>3))}
+\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{1}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{))}\hlopt{-}
+  \hlstd{(}\hlnum{1}\hlopt{-}\hlkwd{pgamma}\hlstd{(}\hlkwc{q}\hlstd{=}\hlnum{3}\hlstd{,} \hlkwc{shape}\hlstd{=}\hlnum{2}\hlstd{,} \hlkwc{scale}\hlstd{=}\hlnum{1}\hlopt{/}\hlstd{(}\hlnum{2}\hlopt{*}\hlnum{0.2}\hlstd{)))}
 \end{alltt}
 \begin{verbatim}
 ## [1] 0.2758208
@@ -581,7 +512,8 @@ $n=50$.
 \end{knitrout}
   \item Find the approximate probability, using the Central Limit Theorem, that two randomly 
 	  selected rats injected with the toxic substance live between 1 and 3 days on average. Comment
-	  on connection between the results and the assumptions of Central Limit Theorem.
+	  on connection between the results and the assumptions of Central Limit Theorem.\\
+	  \textbf{Solution:}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -593,15 +525,10 @@ $n=50$.
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+We can see that the probability is far off. The explanation is simple: here, we are using only two rats (so $n=2$), and one of CLT assumptions is that $n>30$. So no wonder that the result is off! 
 \item Under what conditions would the approximate probability calculated in 
-part (f) better match the exact probability in part (e)?
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlcom{#bigger N}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
+part (f) better match the exact probability in part (e)?\\
+\textbf{Solution:} According to the CLT, the bigger the $n$, the closer our AG distribution will get to the actual distribution.
   \end{enumerate}
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -691,15 +618,17 @@ than 13, $\mu>13$?
 \hlstd{tstat} \hlkwb{<-} \hlkwd{t.test}\hlstd{(}\hlkwc{x}\hlstd{=uis}\hlopt{$}\hlstd{BECK,}
        \hlkwc{mu} \hlstd{=} \hlnum{13}\hlstd{,}
        \hlkwc{alternative} \hlstd{=} \hlstr{"greater"}\hlstd{)}
-\hlstd{tstat}\hlopt{$}\hlstd{p.value}
+\hlkwd{paste}\hlstd{(}\hlstr{"P-value:"}\hlstd{, tstat}\hlopt{$}\hlstd{p.value)}
 \end{alltt}
 \begin{verbatim}
-## [1] 7.412123e-27
+## [1] "P-value: 7.41212268149766e-27"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
       \item Graph the results of this test.\\
-      \textbf{Solution:}
+      \textbf{Solution:} Since we are using T-test for this, let's create a T-distribution with 574 degrees of freedom. Then, we are going to map our rejection region onto the graph (it's going to be at $t=1.647513$). Finally, I am going to put our value on X-axis and assess how far away it is from the rejection region (keep in mind the p-value — we already have in mind enough evidence to reject null hypothesis).
+\begin{figure}[H]
+\begin{center}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -717,11 +646,19 @@ than 13, $\mu>13$?
            \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
   \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=tstat}\hlopt{$}\hlstd{statistic}\hlopt{-}\hlnum{1.8}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{0.02}\hlstd{,}
            \hlkwc{label}\hlstd{=}\hlstr{"P-value = 7.41 * 10^-27"}\hlstd{,}
-           \hlkwc{size}\hlstd{=}\hlnum{3}\hlstd{)}
+           \hlkwc{size}\hlstd{=}\hlnum{3}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{x}\hlstd{=}\hlstr{"T"}\hlstd{,}
+       \hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"T-distribution to assess a null hypothesis"}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-19-1} 
+\includegraphics[width=\maxwidth]{figure/p3plot1-1} 
 \end{knitrout}
+\caption{T-distribution with 574 degrees of freedom}
+\label{p3plot1}
+\end{center}
+\end{figure}
       \item Report a 95\% confidence interval for the average BECK depression score
 and interpret it in the context of this question.\\
 \textbf{Solution:}
@@ -742,33 +679,24 @@ and interpret it in the context of this question.\\
     \end{enumerate}
 \item Is there a significant difference in the length of stay in treatment by 
     treatment site?\\
-\textbf{Solution: First, let's establish our hypothesis.}
+\textbf{Solution:} First, let's establish our hypothesis.
 \begin{align*}
-H_{0}&:\mu_{0}=\mu{1}\\
-H_{a}&:\mu_{0}\neq\mu{1}
+H_{0}&:\mu_{0}-\mu{1}=0\\
+H_{a}&:\mu_{0}-\mu{1}\neq0
 \end{align*}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{res} \hlkwb{<-} \hlkwd{t.test}\hlstd{(uis}\hlopt{$}\hlstd{LEN.T} \hlopt{~} \hlstd{uis}\hlopt{$}\hlstd{SITE,}
               \hlkwc{data} \hlstd{= uis,} \hlkwc{var.equal} \hlstd{= F)}
-\hlstd{res}
+\hlkwd{paste}\hlstd{(}\hlstr{"P-value:"}\hlstd{,res}\hlopt{$}\hlstd{p.value)}
 \end{alltt}
 \begin{verbatim}
-## 
-## 	Welch Two Sample t-test
-## 
-## data:  uis$LEN.T by uis$SITE
-## t = -6.138, df = 211.39, p-value = 4.072e-09
-## alternative hypothesis: true difference in means is not equal to 0
-## 95 percent confidence interval:
-##  -68.71283 -35.30646
-## sample estimates:
-## mean in group 0 mean in group 1 
-##         84.9275        136.9371
+## [1] "P-value: 4.07192587806883e-09"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+Based on this two-sample t-test, we have enough evidence to suggest that (with 95\% confidence) our true mean is not equal to 0! Therefore, we have statistically significant results showing that there's a difference in the length of stay between two sites!
   \end{enumerate}
   \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -820,149 +748,128 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
 \end{kframe}
 \end{knitrout}
       \item What is the test statistics for this test?\\
-      \textbf{Solution:} Z-value 
+      \textbf{Solution:} We are working with proportions, so we are going to use a Z-value.
       \item At what value of $\hat{P}$ does the rejection region start for $\alpha=0.05$?\\
       \textbf{Solution:}
       \begin{align*}
       z &= \frac{\hat{p}-p_{0}}{\sqrt{\frac{p_{0}(1-p_{0})}{n}}}\\
       \hat{p} &= \frac{\sqrt{n}z\sqrt{p_{0}(1-p_{0})}}{n} + p_{0}
       \end{align*}
+      
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{p0} \hlkwb{<-} \hlnum{0.5}
 \hlstd{phat} \hlkwb{<-} \hlkwd{table}\hlstd{(nodal}\hlopt{$}\hlstd{r)[}\hlnum{2}\hlstd{]}\hlopt{/}\hlkwd{nrow}\hlstd{(nodal)}
 \hlstd{n} \hlkwb{<-} \hlkwd{nrow}\hlstd{(nodal)}
-\hlstd{z1} \hlkwb{<-} \hlkwd{qt}\hlstd{(}\hlnum{.975}\hlstd{, n}\hlopt{-}\hlnum{1}\hlstd{)}
-\hlstd{z2} \hlkwb{<-} \hlopt{-}\hlstd{z1}
+\hlstd{z1} \hlkwb{<-} \hlkwd{qnorm}\hlstd{(}\hlnum{.05}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{1}\hlstd{)}
 
-\hlstd{(}\hlkwd{sqrt}\hlstd{(n)}\hlopt{*}\hlstd{z1}\hlopt{*}\hlkwd{sqrt}\hlstd{(p0}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{-}\hlstd{p0)))}\hlopt{/}\hlstd{(n)} \hlopt{+} \hlstd{p0} \hlcom{#for upper bound}
+\hlstd{answerProp}\hlkwb{<-}\hlstd{(}\hlkwd{sqrt}\hlstd{(n)}\hlopt{*}\hlstd{z1}\hlopt{*}\hlkwd{sqrt}\hlstd{(p0}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{-}\hlstd{p0)))}\hlopt{/}\hlstd{(n)} \hlopt{+} \hlstd{p0}
+
+\hlkwd{paste}\hlstd{(}\hlstr{"Rejection starts with"}\hlstd{, answerProp,} \hlstr{"but we already have a lower number:"}\hlstd{,}
+      \hlkwd{table}\hlstd{(nodal}\hlopt{$}\hlstd{r)[}\hlnum{2}\hlstd{]}\hlopt{/}\hlkwd{nrow}\hlstd{(nodal))}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.6378171
-\end{verbatim}
-\begin{alltt}
-\hlstd{(}\hlkwd{sqrt}\hlstd{(n)}\hlopt{*}\hlstd{z2}\hlopt{*}\hlkwd{sqrt}\hlstd{(p0}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{-}\hlstd{p0)))}\hlopt{/}\hlstd{(n)} \hlopt{+} \hlstd{p0} \hlcom{#for lower bound}
-\end{alltt}
-\begin{verbatim}
-## [1] 0.3621829
-\end{verbatim}
-\begin{alltt}
-\hlkwd{table}\hlstd{(nodal}\hlopt{$}\hlstd{r)}
-\end{alltt}
-\begin{verbatim}
-## 
-##  0  1 
-## 33 20
-\end{verbatim}
-\begin{alltt}
-\hlkwd{prop.test}\hlstd{(}\hlnum{20}\hlstd{,} \hlnum{53}\hlstd{,} \hlkwc{alternative}\hlstd{=}\hlstr{"less"}\hlstd{)}
-\end{alltt}
-\begin{verbatim}
-## 
-## 	1-sample proportions test with continuity correction
-## 
-## data:  20 out of 53, null probability 0.5
-## X-squared = 2.717, df = 1, p-value = 0.04964
-## alternative hypothesis: true p is less than 0.5
-## 95 percent confidence interval:
-##  0.0000000 0.4997615
-## sample estimates:
-##         p 
-## 0.3773585
+## [1] "Rejection starts with 0.38703098909445 but we already have a lower number: 0.377358490566038"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+Having a number lower than the rejection region is the first sign that true $\hat{P}$ is not 0.5!
       \item What is the p value for this test?
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{zAns} \hlkwb{<-} \hlstd{(phat}\hlopt{-}\hlstd{p0)}\hlopt{/}\hlkwd{sqrt}\hlstd{((p0}\hlopt{*}\hlstd{(}\hlnum{1}\hlopt{-}\hlstd{p0))}\hlopt{/}\hlstd{(n))}
-\hlstd{zAns}
+\hlstd{answerPropTest} \hlkwb{<-} \hlkwd{prop.test}\hlstd{(}\hlnum{20}\hlstd{,} \hlnum{53}\hlstd{,} \hlkwc{p}\hlstd{=}\hlnum{0.5}\hlstd{,} \hlkwc{alternative}\hlstd{=}\hlstr{"less"}\hlstd{)}
+\hlkwd{paste}\hlstd{(}\hlstr{"P-value:"}\hlstd{,answerPropTest}\hlopt{$}\hlstd{p.value)}
 \end{alltt}
 \begin{verbatim}
-##         1 
-## -1.785687
+## [1] "P-value: 0.0496428173856788"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+We have enough evidence to reject null hypothesis in favor of the alternative!
       \item Graph the results of this test.
+\begin{figure}[H]
+\begin{center}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{ggdat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{t}\hlstd{=}\hlkwd{seq}\hlstd{(}\hlopt{-}\hlnum{5}\hlstd{,}\hlnum{5}\hlstd{,}\hlkwc{length}\hlstd{=}\hlnum{500}\hlstd{))}\hlopt{%>%}
-  \hlkwd{mutate}\hlstd{(}\hlkwc{f}\hlstd{=}\hlkwd{dt}\hlstd{(}\hlkwc{x}\hlstd{=t,} \hlkwc{df}\hlstd{=n}\hlopt{-}\hlnum{1}\hlstd{))}
+  \hlkwd{mutate}\hlstd{(}\hlkwc{f}\hlstd{=}\hlkwd{dnorm}\hlstd{(}\hlkwc{x}\hlstd{=t,} \hlkwc{mean}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{))}
 
 \hlkwd{ggplot}\hlstd{(}\hlkwc{data}\hlstd{=ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=t,} \hlkwc{y}\hlstd{=f))}\hlopt{+}
   \hlkwd{geom_line}\hlstd{()} \hlopt{+}
   \hlkwd{geom_hline}\hlstd{(}\hlkwc{yintercept}\hlstd{=}\hlnum{0}\hlstd{)}\hlopt{+}
-  \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=zAns,} \hlkwc{y}\hlstd{=}\hlnum{0}\hlstd{),} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
-  \hlkwd{geom_vline}\hlstd{(}\hlkwc{xintercept}\hlstd{=}\hlkwd{qt}\hlstd{(}\hlkwc{p}\hlstd{=}\hlnum{0.975}\hlstd{,} \hlkwc{df}\hlstd{=n}\hlopt{-}\hlnum{1}\hlstd{),}
+   \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=}\hlopt{-}\hlkwd{sqrt}\hlstd{(answerPropTest}\hlopt{$}\hlstd{statistic),} \hlkwc{y}\hlstd{=}\hlnum{0}\hlstd{),} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
+  \hlkwd{geom_vline}\hlstd{(}\hlkwc{xintercept}\hlstd{=}\hlkwd{qnorm}\hlstd{(}\hlkwc{p}\hlstd{=}\hlnum{0.05}\hlstd{,} \hlkwc{mean}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),}
               \hlkwc{linetype}\hlstd{=}\hlstr{"dashed"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
-  \hlkwd{geom_vline}\hlstd{(}\hlkwc{xintercept}\hlstd{=}\hlkwd{qt}\hlstd{(}\hlkwc{p}\hlstd{=}\hlnum{0.025}\hlstd{,} \hlkwc{df}\hlstd{=n}\hlopt{-}\hlnum{1}\hlstd{),}
-              \hlkwc{linetype}\hlstd{=}\hlstr{"dashed"}\hlstd{,} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
+  \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{1.2}\hlopt{*}\hlkwd{qnorm}\hlstd{(}\hlkwc{p}\hlstd{=}\hlnum{0.05}\hlstd{,} \hlkwc{mean}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{),} \hlkwc{y}\hlstd{=}\hlnum{0.30}\hlstd{,}
+           \hlkwc{label}\hlstd{=}\hlstr{"Rejection Region"}\hlstd{,} \hlkwc{angle}\hlstd{=}\hlstr{"90"}\hlstd{,}
+           \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
+  \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlopt{-}\hlkwd{sqrt}\hlstd{(answerPropTest}\hlopt{$}\hlstd{statistic),} \hlkwc{y}\hlstd{=}\hlnum{0.01}\hlstd{,}
+           \hlkwc{label}\hlstd{=}\hlstr{"p-value = 0.04964"}\hlstd{,}
+           \hlkwc{size}\hlstd{=}\hlnum{3}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{x}\hlstd{=}\hlstr{"X"}\hlstd{,}
+       \hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Z-test for proportion"}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-26-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-23-1} 
 \end{knitrout}
+\caption{Results of Z-test}
+\label{p4plot1}
+\end{center}
+\end{figure}
+It's one of those times when it's really hard to tell by the graph alone if the dot within the rejection region or outside of it. So, as I've done before, we can use \texttt{prop.test()} in order to check the p-value!
       \item Report a 95\% confidence interval for the proportion of prostate cancer patients with nodal involvement and interpret it in the context of this question.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{#no clue}
+\hlstd{propCI}\hlkwb{<-}\hlkwd{prop.test}\hlstd{(}\hlnum{20}\hlstd{,} \hlnum{53}\hlstd{,} \hlkwc{alternative}\hlstd{=}\hlstr{"two.sided"}\hlstd{)}
+\hlkwd{paste}\hlstd{(}\hlstr{"Confidence interval is"}\hlstd{, propCI}\hlopt{$}\hlstd{conf.int)}
 \end{alltt}
+\begin{verbatim}
+## [1] "Confidence interval is 0.251167223511435"
+## [2] "Confidence interval is 0.521281347288513"
+\end{verbatim}
 \end{kframe}
 \end{knitrout}
     \end{enumerate}
-    \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?
+    \item Clearly, it would be preferable if an accurate assessment of nodal involvement could be made without surgery. Is there a significant difference in the nodal involvement of patients with any of the severity indicators?\\
+    \textbf{Solution:}\\
+    $H_{0}:\hat{p}_{1}-\hat{p}_{2}=0$\\
+    $H_{0}:\hat{p}_{1}-\hat{p}_{2}\neq0$
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{#H0: phat = 0.5}
-\hlcom{#Ha: phat != 0.5}
+\hlcom{#H0: p1-p2 = 0}
+\hlcom{#Ha: p1-p2 != 0}
 \hlstd{nodal.c} \hlkwb{<-} \hlstd{nodal} \hlopt{%>%}
   \hlkwd{mutate}\hlstd{(}\hlkwc{sev} \hlstd{=} \hlkwd{case_when}\hlstd{(stage}\hlopt{==}\hlnum{1} \hlopt{~} \hlnum{1}\hlstd{,}
-                     \hlstd{grade}\hlopt{==}\hlnum{1} \hlopt{~} \hlnum{1}\hlstd{,}
-                     \hlstd{xray}\hlopt{==}\hlnum{1} \hlopt{~} \hlnum{1}\hlstd{,}
-                     \hlnum{TRUE} \hlopt{~} \hlnum{0}\hlstd{))}\hlopt{%>%}
-  \hlkwd{group_by}\hlstd{(sev, r)}\hlopt{%>%}
-  \hlkwd{summarise}\hlstd{(}\hlkwc{total} \hlstd{=} \hlkwd{n}\hlstd{())}
-\end{alltt}
+                         \hlstd{grade}\hlopt{==}\hlnum{1} \hlopt{~} \hlnum{1}\hlstd{,}
+                         \hlstd{xray}\hlopt{==}\hlnum{1} \hlopt{~} \hlnum{1}\hlstd{,}
+                         \hlnum{TRUE} \hlopt{~} \hlnum{0}\hlstd{))} \hlcom{#put all severity indicators into one}
+\hlcom{#non severe}
+\hlstd{x1}\hlkwb{<-}\hlnum{1}
+\hlstd{n1}\hlkwb{<-}\hlnum{16}
+\hlcom{#Non severe: 1 involvement out of 16 cases}
 
+\hlcom{#severe}
+\hlstd{x2}\hlkwb{<-}\hlnum{19}
+\hlstd{n2}\hlkwb{<-}\hlnum{37}
+\hlcom{#Severe: 19 involvements out of 37 cases}
 
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# `summarise()` has grouped output by 'sev'. You can override using the `.groups` argument.}}\begin{alltt}
-\hlstd{(nodal.c)}
+\hlstd{finalProp} \hlkwb{<-} \hlkwd{prop.test}\hlstd{(}\hlkwc{x}\hlstd{=}\hlkwd{c}\hlstd{(x1,x2),}
+          \hlkwc{n}\hlstd{=}\hlkwd{c}\hlstd{(n1,n2))}
+\hlkwd{paste}\hlstd{(}\hlstr{"P-value of two-sample test is"}\hlstd{, finalProp}\hlopt{$}\hlstd{p.value)}
 \end{alltt}
 \begin{verbatim}
-## # A tibble: 4 x 3
-## # Groups:   sev [2]
-##     sev     r total
-##   <dbl> <dbl> <int>
-## 1     0     0    15
-## 2     0     1     1
-## 3     1     0    18
-## 4     1     1    19
-\end{verbatim}
-\begin{alltt}
-\hlkwd{prop.test}\hlstd{(}\hlnum{19}\hlstd{,} \hlnum{20}\hlstd{,}
-      \hlkwc{p}\hlstd{=}\hlnum{0.5}\hlstd{,}
-      \hlkwc{alternative} \hlstd{=} \hlstr{"two.sided"}\hlstd{)}
-\end{alltt}
-\begin{verbatim}
-## 
-## 	1-sample proportions test with continuity correction
-## 
-## data:  19 out of 20, null probability 0.5
-## X-squared = 14.45, df = 1, p-value = 0.0001439
-## alternative hypothesis: true p is not equal to 0.5
-## 95 percent confidence interval:
-##  0.7305563 0.9973844
-## sample estimates:
-##    p 
-## 0.95
+## [1] "P-value of two-sample test is 0.00509373051672405"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
+Based on the p-value, we have enough evidence to reject the null hypothesis in favor of alternative. Therefore, there's actually a significant in the nodal involvement in patients with severity indicators. 
   \end{enumerate}
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -974,7 +881,130 @@ The treatment strategy for a patient diagnosed with cancer of the prostate depen
 \noindent \textbf{Bonus 1:} Use the gganimate package \citep{gganimate} for \texttt{R} to create a plot that demonstrates the Central Limit Theorem for the Poisson, Binomial, Exponential, and Gaussian distributions in a $2\times 2$ grid as \href{https://moodle.colgate.edu/mod/forum/discuss.php?d=127682}{here}.\\
 
 Note that we can't add GIFs to the .pdf document, so you'll have to email me your code for this part. You'll find \texttt{  transition\_time()} helpful for creating your animation and \texttt{gganimate\_save()} helpful for saving your animation. \vspace{2em}\\
+\textbf{Solution:}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(gganimate)}
+\hlkwd{library}\hlstd{(gifski)}
+\hlkwd{library}\hlstd{(transformr)}
 
+\hlcom{#Binom}
+\hlcom{#E(X)=np}
+\hlcom{#Var(X)=np*(1-p)}
+\hlcom{#100*0.5*(1-0.5)}
+
+\hlstd{final1.df} \hlkwb{<-} \hlkwd{c}\hlstd{()}
+\hlkwa{for}\hlstd{(num} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{150}\hlstd{)\{}
+  \hlstd{generate} \hlkwb{<-} \hlkwd{rnorm}\hlstd{(num,} \hlkwc{mean}\hlstd{=num}\hlopt{*}\hlnum{0.3}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(num}\hlopt{*}\hlnum{0.3}\hlopt{*}\hlnum{0.7}\hlstd{))}
+  \hlstd{num.df} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{values}\hlstd{=generate,} \hlkwc{n}\hlstd{=num)}
+  \hlstd{final1.df}\hlkwb{<-}\hlkwd{bind_rows}\hlstd{(final1.df, num.df)}
+\hlstd{\}}
+\hlstd{p1}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(final1.df,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=values))}\hlopt{+}
+  \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),}
+                 \hlkwc{color}\hlstd{=}\hlstr{"white"}\hlstd{,}
+                 \hlkwc{fill}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=num}\hlopt{*}\hlnum{0.3}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(num}\hlopt{*}\hlnum{0.3}\hlopt{*}\hlnum{0.7}\hlstd{)),}
+                \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{x}\hlstd{=}\hlstr{"X"}\hlstd{,}
+       \hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Poisson distribution"}\hlstd{,}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"Lambda: 5"}\hlstd{)}\hlopt{+}
+  \hlkwd{transition_states}\hlstd{(n,}
+                    \hlkwc{transition_length} \hlstd{=} \hlnum{1}\hlstd{,}
+                    \hlkwc{state_length} \hlstd{=} \hlnum{1}\hlstd{)}\hlopt{+}
+  \hlkwd{ease_aes}\hlstd{(}\hlstr{'sine-in-out'}\hlstd{)}
+
+\hlstd{anim1} \hlkwb{<-} \hlkwd{animate}\hlstd{(p1,} \hlkwc{renderer} \hlstd{=} \hlkwd{gifski_renderer}\hlstd{())}
+\hlkwd{anim_save}\hlstd{(}\hlstr{"poisson.gif"}\hlstd{, anim1)}
+
+
+\hlcom{#Poisson}
+\hlcom{#E(X)=lambda}
+\hlcom{#Var(X)=lambda}
+\hlstd{final2.df} \hlkwb{<-} \hlkwd{c}\hlstd{()}
+\hlkwa{for}\hlstd{(num} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{150}\hlstd{)\{}
+  \hlstd{generate} \hlkwb{<-} \hlkwd{rnorm}\hlstd{(num,} \hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{5}\hlstd{))}
+  \hlstd{num.df} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{values}\hlstd{=generate,} \hlkwc{n}\hlstd{=num)}
+  \hlstd{final2.df}\hlkwb{<-}\hlkwd{bind_rows}\hlstd{(final2.df, num.df)}
+\hlstd{\}}
+\hlstd{p2}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(final2.df,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=values))}\hlopt{+}
+  \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),}
+                 \hlkwc{color}\hlstd{=}\hlstr{"white"}\hlstd{,}
+                 \hlkwc{fill}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{5}\hlstd{)),}
+                \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{x}\hlstd{=}\hlstr{"X"}\hlstd{,}
+       \hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Poisson distribution"}\hlstd{,}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"Lambda: 5"}\hlstd{)}\hlopt{+}
+  \hlkwd{transition_states}\hlstd{(n,}
+                    \hlkwc{transition_length} \hlstd{=} \hlnum{1}\hlstd{,}
+                    \hlkwc{state_length} \hlstd{=} \hlnum{1}\hlstd{)}\hlopt{+}
+  \hlkwd{ease_aes}\hlstd{(}\hlstr{'sine-in-out'}\hlstd{)}
+
+\hlstd{anim2} \hlkwb{<-} \hlkwd{animate}\hlstd{(p2,} \hlkwc{renderer} \hlstd{=} \hlkwd{gifski_renderer}\hlstd{())}
+\hlkwd{anim_save}\hlstd{(}\hlstr{"poisson.gif"}\hlstd{, anim2)}
+
+
+\hlcom{#Exponential}
+\hlcom{#E(X)=1/lambda}
+\hlcom{#Var(X)=1/lambda^2}
+
+\hlstd{final3.df} \hlkwb{<-} \hlkwd{c}\hlstd{()}
+\hlkwa{for}\hlstd{(num} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{150}\hlstd{)\{}
+  \hlstd{generate} \hlkwb{<-} \hlkwd{rnorm}\hlstd{(num,} \hlkwc{mean}\hlstd{=}\hlnum{1}\hlopt{/}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{1}\hlopt{/}\hlnum{25}\hlstd{))}
+  \hlstd{num.df} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{values}\hlstd{=generate,} \hlkwc{n}\hlstd{=num)}
+  \hlstd{final3.df}\hlkwb{<-}\hlkwd{bind_rows}\hlstd{(final3.df, num.df)}
+\hlstd{\}}
+
+\hlstd{p3}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(final3.df,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=values))}\hlopt{+}
+  \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),}
+                 \hlkwc{color}\hlstd{=}\hlstr{"white"}\hlstd{,}
+                 \hlkwc{fill}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{1}\hlopt{/}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{1}\hlopt{/}\hlnum{25}\hlstd{)),}
+                \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{x}\hlstd{=}\hlstr{"X"}\hlstd{,}
+       \hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Exponential distribution"}\hlstd{,}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"Lambda: 5"}\hlstd{)}\hlopt{+}
+\hlkwd{transition_states}\hlstd{(n,}
+                    \hlkwc{transition_length} \hlstd{=} \hlnum{1}\hlstd{,}
+                    \hlkwc{state_length} \hlstd{=} \hlnum{1}\hlstd{)}\hlopt{+}
+  \hlkwd{ease_aes}\hlstd{(}\hlstr{'sine-in-out'}\hlstd{)}
+
+\hlstd{anim3} \hlkwb{<-} \hlkwd{animate}\hlstd{(p3,} \hlkwc{renderer} \hlstd{=} \hlkwd{gifski_renderer}\hlstd{())}
+\hlkwd{anim_save}\hlstd{(}\hlstr{"exponential.gif"}\hlstd{, anim3)}
+
+\hlcom{#Normal}
+\hlcom{#E(X)=mu}
+\hlcom{#Var(X)=sigma^2}
+\hlstd{final4.df} \hlkwb{<-} \hlkwd{c}\hlstd{()}
+\hlkwa{for}\hlstd{(num} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{150}\hlstd{)\{}
+  \hlstd{generate} \hlkwb{<-} \hlkwd{rnorm}\hlstd{(num,} \hlkwc{mean}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{1}\hlstd{)}
+  \hlstd{num.df} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{values}\hlstd{=generate,} \hlkwc{n}\hlstd{=num)}
+  \hlstd{final4.df}\hlkwb{<-}\hlkwd{bind_rows}\hlstd{(final4.df, num.df)}
+\hlstd{\}}
+\hlstd{p4}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(final4.df,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=values))}\hlopt{+}
+  \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),}
+                 \hlkwc{color}\hlstd{=}\hlstr{"white"}\hlstd{,}
+                 \hlkwc{fill}\hlstd{=}\hlstr{"dark red"}\hlstd{)}\hlopt{+}
+  \hlkwd{geom_function}\hlstd{(}\hlkwc{fun}\hlstd{=dnorm,} \hlkwc{args}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{mean}\hlstd{=}\hlnum{1}\hlopt{/}\hlnum{5}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlkwd{sqrt}\hlstd{(}\hlnum{1}\hlopt{/}\hlnum{25}\hlstd{)),}
+                \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}\hlopt{+}
+  \hlkwd{labs}\hlstd{(}\hlkwc{x}\hlstd{=}\hlstr{"X"}\hlstd{,}
+       \hlkwc{y}\hlstd{=}\hlstr{"Density"}\hlstd{,}
+       \hlkwc{title}\hlstd{=}\hlstr{"Normal distribution"}\hlstd{,}
+       \hlkwc{subtitle}\hlstd{=}\hlstr{"Mean: 0, SD: 1"}\hlstd{)}\hlopt{+}
+  \hlkwd{transition_states}\hlstd{(n,}
+                    \hlkwc{transition_length} \hlstd{=} \hlnum{1}\hlstd{,}
+                    \hlkwc{state_length} \hlstd{=} \hlnum{1}\hlstd{)}\hlopt{+}
+  \hlkwd{ease_aes}\hlstd{(}\hlstr{'sine-in-out'}\hlstd{)}
+
+\hlstd{anim4} \hlkwb{<-} \hlkwd{animate}\hlstd{(p4,} \hlkwc{renderer} \hlstd{=} \hlkwd{gifski_renderer}\hlstd{())}
+\hlkwd{anim_save}\hlstd{(}\hlstr{"normal.gif"}\hlstd{, anim4)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
 \noindent \textbf{Bonus 2:} Compare the effectiveness of the $t$-interval with the bootstrap interval. In a loop, generate 1000 datasets, evaluate a $t$ and bootstrapping confidence interval for each set of data, and track whether you've captured the true population mean. An effective answer here would evaluate this several times varying sample size and the data generating distribution.
 
