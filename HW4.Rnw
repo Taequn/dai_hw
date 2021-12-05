@@ -43,14 +43,47 @@ reached an A1C under 7\%, noting higher A1C is indicative of higher risk of hear
 \begin{enumerate}
 \item Explain why this statement alone isn't enough to conclude whether there is a statistically 
 significant difference among the treatments.
+
+<<>>=
+"1) To begin with, we don't know their baseline, so we can't really assess 
+the level of change that they went through."
+
+"2) We'd need to see either a control group to compare the level of effect between
+different pills. Or we need to see the base levels of A1C that they started with, and then
+we can do t-test to assess if the changes that we're observing are statistically significant.
+
+We'd need a baseline to run an ANOVA to assess if there are significant differences between
+the original state of the patients and the power of change between the different treatments. 
+"
+@
 \item The statement on Ozempic's website comes from a phase 3a randomized double-blind study. 
 \cite{Ahren17} reports that 409 received Ozempic (0.5 mg), 409 received Ozempic (1 mg), and 407 
 received Januvia (100 mg). 
 \begin{enumerate}
   \item Determine whether there is sufficient evidence of a difference in rates of attaining an 
   A1C under 7\% across treatments.
+  
+<<>>=
+#https://pubmed.ncbi.nlm.nih.gov/28385659/
+#Mean baseline HbA1c was 8·1%
+#2)
+
+"(estimated treatment difference vs sitagliptin -0·77% [95% CI -0·92 to -0·62] 
+with semaglutide 0·5 mg and -1·06% [-1·21 to -0·91] 
+with semaglutide 1·0 mg; p<0·0001 for non-inferiority 
+and for superiority, for both semaglutide doses vs sitagliptin"
+
+#t sample proportion test
+#DO IT
+
+@
   \item Perform a follow-up analysis for comparing treatments. If you were at high risk for 
   cardiovascular events, which medication would you want to take.
+<<>>=
+
+@
+
+
 \end{enumerate}
 \end{enumerate}
 \newpage
@@ -79,6 +112,19 @@ under a given condition (or broken assumption) we can just simulate it!
   \item Conduct a simulation study using the Laplace distribution. To do so, 
   complete the following 1000 times and report the proportion of times the
   data lead to a rejection of the null hypothesis.\\
+<<>>=
+library(rmutil)
+library(tidyverse)
+
+ggdat <- data.frame(x=seq(-5, 5, length.out=5000))%>%
+  mutate(f=dlaplace(x, m=0, s=2),
+         f1=dnorm(x, mean=0, sd=2))
+
+#set the legend
+ggplot(ggdat, aes(x=x, y=f))+
+  geom_line(color="blue")+
+  geom_line(aes(y=f1), color="red")
+@
   
   The most efficient way to complete this question (including the other parts)
   is to write a function that completes the following. 
@@ -113,6 +159,56 @@ under a given condition (or broken assumption) we can just simulate it!
   \end{itemize}
     Comment on the results of this simulation completed in the default case where
   $m_1=m_2=m_3=m_4=0$, $s_1=s_2=s_3=s_4=2$, and $n_1=n_2=n_3=n_4=5$
+  
+<<>>=
+aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5){
+  if(rand.n){
+    n=round(runif(1, min=0, max=200),0)
+  }
+  
+  if(rand.s){
+    s=round(runif(1, min=1, max=10),0)
+  }else{
+    s=1
+  }
+  
+  
+  if(equal.m){
+    t1<-rlaplace(n=n, m=0, s=s)
+    label1<-"T1"
+    
+    t2<-rlaplace(n=n, m=0, s=s)
+    label2<-"T2"
+    
+    t3<-rlaplace(n=n, m=0, s=s)
+    label3<-"T3"
+    
+    t4<-rlaplace(n=n, m=0, s=s)
+    label4<-"T4"
+  }
+  
+  else{
+    t1<-rlaplace(n=n, m=0, s=s)
+    t2<-rlaplace(n=n, m=0, s=s)
+    t3<-rlaplace(n=n, m=0, s=s)
+    t4<-rlaplace(n=n, m=1, s=s)
+  }
+  
+  dat1<-bind_cols(t1, label1)
+  dat2<-bind_cols(t2, label2)
+  dat3<-bind_cols(t3, label3)
+  dat4<-bind_cols(t4, label4)
+  
+  dat<-bind_rows(dat1, dat2, dat3, dat4)
+  
+  aov(formula=dat[1]~dat[2])
+}
+aovFunc()
+@
+
+<<>>=
+t1<-rlaplace(n=5, m=0, s=1)
+@
   \item Repeat the simulation study in (b-d), except with different means; i.e.,
   $m_1=m_2=m_3=0$, and $m_4=1$. Comment on the results of this simulation.
 \item Repeat the simulation study in (b-c), except with $n=15$. Comment on the results of this simulation.
