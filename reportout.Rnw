@@ -1,0 +1,44 @@
+\documentclass{article}
+\usepackage{amsmath} %This allows me to use the align functionality.
+                     %If you find yourself trying to replicate
+                     %something you found online, ensure you're
+                     %loading the necessary packages!
+\usepackage{amsfonts}%Math font
+\usepackage{graphicx}%For including graphics
+\usepackage{hyperref}%For Hyperlinks
+\hypersetup{colorlinks = true,citecolor=black}
+\usepackage{natbib}        %For the bibliography
+\bibliographystyle{apalike}%For the bibliography
+\usepackage[margin=1.0in]{geometry}
+\usepackage{float}
+\begin{document}
+\noindent \textbf{MA 354: Data Analysis I -- Fall 2021}\\%\\ gives you a new line
+\noindent \textbf{Homework 3:}\vspace{1em}\\
+\emph{Complete the following opportunities to use what we've talked about in class. These questions will be graded for correctness, communication and succinctness. Ensure you show your work and explain your logic in a legible and refined submission.}
+
+\section{Homework portion}
+\subsection{Sessions attended}
+I attended all the sessions from the very beginning to the very end. In addition to attending the sessions, I also worked on the data analysis after the end of the first and the second days.
+
+\subsection{Role in the Output}
+During the three days of the event, I was responsible for leveraging my R knowledge to build the ideas and solutions that the team came up with. \\
+
+I started the first day with basic data manipulation. I turned the integers of races into the names. I took the provided information for the recommended sentences and assigned each defendant a value that would show how much their sentence (if at all) was different from the recommended guidelines. I followed it up with assigning the discrete value for the type of bias: negative or positive. I finished the day with creating a discrete variable for the type of crime defendants committed.\\
+
+In the following days, I built ANOVA and chi-squared tests to check our hypothesis if there's a discrimination against certain races in Minnesota. At first, it would appear that each race got similar sentences. When I decided to drill down, I found multiple judges who demonstrated bias for white or non-white defendants. \\
+
+In 2021, everyone is aware that they need to be really careful with the sentences, so I decided that we need to follow the trail of bias: I checked if the same judges showed the bias when releasing defendants on parole. As it turns out, they do! Controlling for violent crimes, on average, white defendants were given parole 50\% more often compared to their non-white counterparts.\\
+
+Since the group decided that it's better for me to present, I created a couple of graphs to show the findings that we discovered and presented during the final meeting.
+
+\subsection{The things I learned}
+
+What I got from the topic is that Minnesota is not the place anyone should go to. It felt really problematic that so many judges showed bias against certain defendants, even though they have really clear guidelines for their sentences. That made me think about various problems with the incarceration system within the US. \\
+
+As far as the teamwork goes, I learned that there is no wrong way to approach data analysis. Whenever we were discussing our ideas with the team, we simply selected the ideas that would help us tell the story we wanted to tell. However, this decision did not imply that the other ideas were worse or less valuable! In the end of the datathon, I was left wondering about the number of other stories that were hidden within the dataset that we've worked on!\\
+
+I am confident that I'll be happy to join another QSIDE datathon next time! It was a lot of fun.
+
+\newpage
+\bibliography{bib}
+\end{document}

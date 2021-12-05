@@ -160,73 +160,158 @@ ggplot(ggdat, aes(x=x, y=f))+
     Comment on the results of this simulation completed in the default case where
   $m_1=m_2=m_3=m_4=0$, $s_1=s_2=s_3=s_4=2$, and $n_1=n_2=n_3=n_4=5$
   
-<<>>=
-aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5){
+<<warning=FALSE>>=
+library(rstatix)
+aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5, loop=0,
+                    welch=FALSE){
+  alpha<-0.05
+  count=0
   if(rand.n){
-    n=round(runif(1, min=0, max=200),0)
+    n1=round(runif(1, min=5, max=100),0)
+    n2=round(runif(1, min=5, max=100),0)
+    n3=round(runif(1, min=5, max=100),0)
+    n4=round(runif(1, min=5, max=100),0)
+  }
+  else{
+    n1=n
+    n2=n
+    n3=n
+    n4=n
   }
   
   if(rand.s){
-    s=round(runif(1, min=1, max=10),0)
+    #DOUBLE CHECK WITH PROFESSOR
+    s1=rgamma(1, 2, 1)
+    s2=rgamma(1, 2, 1)
+    s3=rgamma(1, 2, 1)
+    s4=rgamma(1, 2, 1)
   }else{
-    s=1
+    s1=1
+    s2=1
+    s3=1
+    s4=1
   }
-  
-  
-  if(equal.m){
-    t1<-rlaplace(n=n, m=0, s=s)
-    label1<-"T1"
+  for(i in 1:loop){
+    if(equal.m){
+      t1<-rlaplace(n=n1, m=0, s=s1)
+      label1<-"T1"
+      
+      t2<-rlaplace(n=n2, m=0, s=s2)
+      label2<-"T2"
+      
+      t3<-rlaplace(n=n3, m=0, s=s3)
+      label3<-"T3"
+      
+      t4<-rlaplace(n=n4, m=0, s=s4)
+      label4<-"T4"
+    }
     
-    t2<-rlaplace(n=n, m=0, s=s)
-    label2<-"T2"
+    else{
+      t1<-rlaplace(n=n1, m=0, s=s1)
+      label1<-"T1"
+      
+      t2<-rlaplace(n=n2, m=0, s=s2)
+      label2<-"T2"
+      
+      t3<-rlaplace(n=n3, m=0, s=s3)
+      label3<-"T3"
+      
+      t4<-rlaplace(n=n4, m=1, s=s4)
+      label4<-"T4"
+    }
     
-    t3<-rlaplace(n=n, m=0, s=s)
-    label3<-"T3"
+    dat<-data.frame(value=c(t1, t2, t3, t4), 
+                    group=c(rep(c("T1", "T2", "T3", "T4"), 
+                                                         times=c(length(t1), 
+                                                                 length(t2), 
+                                                                 length(t3), 
+                                                                 length(t4)))))
     
-    t4<-rlaplace(n=n, m=0, s=s)
-    label4<-"T4"
+    if(!welch){
+      anova<-summary(aov(value~group, data=dat))
+      sum_test <- unlist((anova))
+      p.value<-sum_test["Pr(>F)1"]
+      #print(p.value) #bugtest
+    }else{
+      anova_w<-welch_anova_test(value~group, data=dat)
+      p.value<-anova_w$p
+    }
+    
+    if(p.value<0.05){
+     count=count+1
+    }
   }
-  
-  else{
-    t1<-rlaplace(n=n, m=0, s=s)
-    t2<-rlaplace(n=n, m=0, s=s)
-    t3<-rlaplace(n=n, m=0, s=s)
-    t4<-rlaplace(n=n, m=1, s=s)
-  }
-  
-  dat1<-bind_cols(t1, label1)
-  dat2<-bind_cols(t2, label2)
-  dat3<-bind_cols(t3, label3)
-  dat4<-bind_cols(t4, label4)
-  
-  dat<-bind_rows(dat1, dat2, dat3, dat4)
-  
-  aov(formula=dat[1]~dat[2])
+  count/loop
 }
-aovFunc()
+aovFunc(loop=100)
 @
 
-<<>>=
-t1<-rlaplace(n=5, m=0, s=1)
-@
   \item Repeat the simulation study in (b-d), except with different means; i.e.,
   $m_1=m_2=m_3=0$, and $m_4=1$. Comment on the results of this simulation.
+
+<<warning=FALSE>>=
+aovFunc(equal.m=FALSE, loop=100)
+@
 \item Repeat the simulation study in (b-c), except with $n=15$. Comment on the results of this simulation.
+<<warning=FALSE>>=
+aovFunc(equal.m=TRUE, loop=100, n=15)
+aovFunc(equal.m=FALSE, loop=100, n=15)
+@
   \item Repeat the simulation study in (b-c), except with $n=50$.
   Comment on the results of this simulation.
+<<warning=FALSE>>=
+aovFunc(equal.m=TRUE, loop=100, n=50)
+aovFunc(equal.m=FALSE, loop=100, n=50)
+@
 \item Repeat (b-e), except randomly select the sample size for each 
 group by selecting $n$ from the uniform(5,100) distribution. This 
 will help us assess the robustness of the equal sample size assumption
 in the Laplace population distribution case. Comment on the results of 
 this simulation.
+<<>>=
+aovFunc(equal.m=TRUE, rand.n=TRUE, loop=100)
+aovFunc(equal.m=FALSE, rand.n=TRUE, loop=100)
+@
 \item Repeat (b-f), except randomly select the dispersion for each 
   group by selecting $s$ from the gamma(2,1) distribution. This 
   will help us assess the robustness of the equal variance assumption
   in the Laplace population distribution case. Comment on the results of 
   this simulation.
+  <<>>=
+aovFunc(equal.m=TRUE, rand.n=TRUE, rand.s=TRUE, loop=100)
+aovFunc(equal.m=FALSE, rand.n=TRUE, rand.s=TRUE, loop=100)
+@
 \item Write a loop that conducts this simulation when (1) $s$ is fixed and (2) 
 when $s$ is random, for the case where the means are unequal. The loop should be 
 with respect to $n$, and should run for $n=5$ to $n=200$.\\
+
+<<>>=
+# results<-c()
+# n<-10:50
+# y1<-c()
+# y2<-c()
+# y3<-c()
+# 
+# for(i in 10:50){
+#   print(i)
+#   unequal<-aovFunc(equal.m=FALSE, rand.s=TRUE, loop=100, n=i)
+#   y1<-c(y1, unequal)
+#   equal<-aovFunc(equal.m=FALSE, rand.s=FALSE, loop=100, n=i)
+#   y2<-c(y2, equal)
+#   
+#   wUnequal<-aovFunc(equal.m=FALSE, rand.s=TRUE, loop=100, n=i, welch=T)
+#   y3<-c(y3, wUnequal)
+# }
+# 
+# ggdat<-data.frame(x=n, equal.s=y2, unequal.s=y1,
+#                   welch=y3)
+# ggplot(ggdat, aes(x=x))+
+#   geom_line(aes(y=equal.s), color="red")+
+#   geom_line(aes(y=unequal.s), color="blue")+
+#   geom_line(aes(y=welch), color="black")+
+#   labs(title="Everybody hates Welch")
+
+@
 \textbf{Note:} This can take some computation time, you'll want to run it and save 
 the image as a .pdf so you can load it instead of rerunning the code.
 \end{enumerate}
@@ -245,38 +330,188 @@ the image as a .pdf so you can load it instead of rerunning the code.
 n=500
 x<-sample(x = seq(0,5,0.01), size=n, replace=T)
 y<-5*x + 3
+
+ggdat<-data.frame(x=x, y=y)
+ggplot(ggdat, aes(x=x, y=y))+
+  geom_smooth(color="blue",
+              method="lm",
+              formula=y~x)+
+  geom_point(shape=1,
+             alpha=.3)
+  theme_bw()
+  #put pearson on the plot
 @
   \item Fit a model to the following simulated data, now with added Normal error. Make
   observations about the model equation and the Pearson correlation in relation to (a).
 <<>>=
 e<-rnorm(n=n,mean=0,sd=3)
 y2<-5*x + 3 + e
+
+ggdat<-data.frame(x=x, y=y2)
+ggplot(ggdat, aes(x=x, y=y))+
+  geom_smooth(color="blue",
+              method="lm",
+              formula=y~x)+
+  geom_point(shape=1,
+             alpha=.3)+
+  theme_bw()
+  #put pearson on the plot
+cor(x, y2, method="pearson")
+
 @
   \item In the model of part (b), evaluate the normality and homogeneity of error terms. Note 
   that we know both of these items to be true since we've taken $\epsilon \sim 
   \textrm{N}(\mu=0,\sigma=3)$.
+<<>>=
+#not stealing your function, prof. c:
+plotResiduals<-function(mod){
+  ggdat <- data.frame(y.hat = fitted(mod),
+                      e = residuals(mod))
+  
+  ########################################
+  ####  Fitted versus residuals
+  ########################################
+  p1<-ggplot(data=ggdat,aes(x=y.hat,y=e))+
+    geom_point(shape=1)+
+    geom_hline(yintercept=0,linetype="dashed")+
+    theme_bw()+
+    xlab(bquote(hat(Y)))+
+    ylab("Residuals")+
+    ggtitle("Fitted Values versus the Residuals")
+  
+  ########################################
+  ####  Histogram with Gaussian Density
+  ########################################
+  ggdat.gaussian<-data.frame(x=seq(min(ggdat$e)-sd(ggdat$e),
+                                   max(ggdat$e)+sd(ggdat$e),length.out = 500),
+                             f=dnorm(seq(min(ggdat$e)-sd(ggdat$e),
+                                     max(ggdat$e)+sd(ggdat$e),length.out = 500),
+                                     #ei should have mean zero
+                                     mean=0,
+                                     #ei should have common variance  
+                                     sd=summary(mod)$sigma),
+                             CDF=pnorm(seq(min(ggdat$e)-sd(ggdat$e),
+                                         max(ggdat$e)+sd(ggdat$e),length.out = 500),
+                                     #ei should have mean zero
+                                     mean=0,
+                                     #ei should have common variance  
+                                     sd=summary(mod)$sigma))
+  
+  d<-density(ggdat$e)
+  p2<-ggplot(data=ggdat,aes(x=e))+
+    geom_histogram(aes(y=..density..), binwidth = d$bw,
+                   fill="lightblue",color="black")+
+    geom_density(aes(color="Empirical"),size=1,
+                 trim=F,show.legend = F)+
+    geom_line(data=ggdat.gaussian,aes(x=x,y=f,color="Gaussian-Assumed"),
+              size=1)+
+    theme_bw()+
+    xlab("Residual")+
+    ylab("Density")+
+    labs(color = "")+
+    theme(legend.position="bottom")+
+    ggtitle("Residual Density")
+  
+  ########################################
+  ####  Plot the residuals ecdf
+  ########################################
+  e.cdf.func<-ecdf(ggdat$e)
+  e.cdf<-e.cdf.func(sort(ggdat$e))
+  
+  ggdat<-ggdat %>% mutate(e.sort=sort(ggdat$e),
+                   e.cdf=e.cdf)
+
+  p3<-ggplot(data=ggdat,aes(x=e.sort))+
+    geom_line(data=ggdat.gaussian,aes(x=x,y=CDF,color="Gaussian-Assumed"),size=1)+
+    geom_step(aes(y=e.cdf,color="Empirical"),show.legend = F,size=1)+
+    geom_hline(yintercept=0)+
+    theme_bw()+
+    xlab("Residual")+
+    ylab("Cumulative Density")+
+    labs(color = "")+
+    theme(legend.position="bottom")+
+    ggtitle("Residual Cumulative Density")
+  
+  ########################################
+  ####  QQplot of the residuals
+  ########################################
+  library("qqplotr")
+  p4<-ggplot(data=ggdat,aes(sample=scale(e)))+ #standardize e
+    stat_qq_band(alpha=0.25) +
+    stat_qq_line() +
+    stat_qq_point() +
+    theme_bw()+
+    xlab("Gaussian Quantiles")+
+    ylab("Sample Quantiles")+
+    ggtitle("Normal Quantile-Quantile Plot of Residuals")
+  
+  
+  ########################################
+  ####  Print
+  ########################################
+  (p1|p4)/(p2|p3)
+}
+@
+
+  <<>>=
+library(patchwork)
+model1 <- lm(y2~x)
+plotResiduals(model1)
+#Variance is the same
+#https://uc-r.github.io/assumptions_homogeneity#visualization
+@
 \item Fit a model to the following simulated data, now with added exponential error.
   Make observations about the model equation and the Pearson correlation in relation 
   to the model of part (b).
 <<>>=
 e<-rexp(n=n,rate = 1/2)
 y3<-5*x + 3 + e
+
+ggdat<-data.frame(x=x, y=y3)
+ggplot(ggdat, aes(x=x, y=y))+
+  geom_smooth(color="blue",
+              method="lm",
+              formula=y~x)+
+  geom_point(shape=1,
+             alpha=.3)+
+  theme_bw()
+  #put pearson on the plot
+cor(x, y3, method="pearson")
 @
+
   \item In the model of part (d), evaluate the normality and homogeneity of error 
   terms. Note that we know that common variance is true but we've taken $\epsilon \sim 
   \textrm{exp}(\beta=2)$.
+  <<>>=
+model2 <- lm(y3~x)
+plotResiduals(model2)
+#It's a skewed normal dist, but it's not homogeneous.
+@
 \item Fit a model to the following simulated data, now with added Heteroskedastic
 normal error. Make observations about the model equation and the Pearson correlation
 in relation to the model of part (b).
 <<>>=
-x4<-x[order(x)]
-e<-rnorm(n=n,mean=0,sd=c(rep(1,n/2),rep(3,n/2)))
+x4<-x[order(x)] 
+e<-rnorm(n=n,mean=0,sd=c(rep(1,n/2),rep(3,n/2))) 
 y4<-5*x4 + 3 + e
+
+ggdat<-data.frame(x=x4, y=y4)
+ggplot(ggdat, aes(x=x, y=y))+
+  geom_smooth(color="blue",
+              method="lm",
+              formula=y~x)+
+  geom_point(shape=1,
+             alpha=.3)+
+  theme_bw()
 @
   \item In the model of part (f), evaluate the normality and homogeneity of error terms. Note
   that we know that normality of error terms is true, but $\epsilon \sim 
   \textrm{N}(\mu=0,\sigma=1)$ for $x<\widehat{m}$ and $\epsilon \sim 
   \textrm{N}(\mu=0,\sigma=3)$ for $x>\widehat{m}$.
+  <<>>=
+model3 <- lm(y4~x4)
+plotResiduals(model3)
+@
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -294,11 +529,46 @@ ggdat <- data.frame(x=sample(x=seq(0,100,0.01),size=n,replace=TRUE)) %>%
   mutate(y=3.5+2.1*x+rnorm(n=n,mean=0,sd=5))
 @
     \item Write out the population model.
+<<>>=
+#Y=B{0}+B{1}{x} + error
+@
     \item Fit the model based on the sample data and write out the sample model below.
+<<>>=
+#hat(Y)=hat(B{0})+hat(B){1}{x}
+four.model<-lm(y~x, data=ggdat)
+summary(four.model)
+
+#hat(B){0}=5.22
+#hat(B){1}{x}=2.06
+
+#hat(Y)=-5.22+2.06x
+
+#Prediction = 5.22+2.06(x) + (random error)
+@
     \item Add the regression line to the plot in black.
+<<>>=
+ggplot(ggdat, aes(x=x, y=y))+
+  geom_smooth(color="black",
+              method="lm",
+              formula=y~x)+
+  geom_point(shape=1,
+             alpha=.3)+
+  theme_bw()
+@
     \item Interpret the $R^2$ of the model.
+    <<>>=
+#Adjusted R-squared:  0.9937 
+#99% of the variance can be explained by the model we built.
+
+@
     \item Interpret the overall $F$ test of the model.
+    <<>>=
+#Look at p-value
+@
     \item Interpret the coefficients of the model; are they what you would expect?
+    <<>>=
+#Yeah, that's easy.
+@
     \item Now, let's add a bad datapoint to the data.
 <<>>=
 ggdat <- rbind(ggdat,     # original data
@@ -306,10 +576,28 @@ ggdat <- rbind(ggdat,     # original data
 @
   \begin{enumerate}
     \item Briefly summarize how adding this data point affects parts (a)-(g).
+    <<>>=
+ggplot(ggdat, aes(x=x, y=y))+
+  geom_smooth(color="black",
+              method="lm",
+              formula=y~x)+
+  geom_point(shape=1,
+             alpha=.3)+
+  theme_bw()
+
+four.model<-lm(y~x, data=ggdat)
+summary(four.model)
+@
     \item Add the resulting regression line to the plot in part (d) in blue.
+    <<>>=
+
+@
     \item Refit this model using several robust techniques for dealing with the
     bad observation. Create a plot that summarizes all the approaches taken, and 
     use a metric to select the best model.
+    <<>>=
+
+@
   \end{enumerate}
   \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
