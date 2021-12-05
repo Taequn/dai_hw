@@ -1,0 +1,23 @@
+\begin{thebibliography}{}
+
+\bibitem[Ahr{\'e}n et~al., 2017]{Ahren17}
+Ahr{\'e}n, B., Masmiquel, L., Kumar, H., Sargin, M., Karsb{\o}l, J.~D.,
+  Jacobsen, S.~H., and Chow, F. (2017).
+\newblock Efficacy and safety of once-weekly semaglutide versus once-daily
+  sitagliptin as an add-on to metformin, thiazolidinediones, or both, in
+  patients with type 2 diabetes (sustain 2): a 56-week, double-blind, phase 3a,
+  randomised trial.
+\newblock {\em The lancet Diabetes \& endocrinology}, 5(5):341--354.
+
+\bibitem[Blanca et~al., 2017]{Blanca17}
+Blanca, M.~J., Alarc{\'o}n, R., Arnau, J., Bono, R., and Bendayan, R. (2017).
+\newblock Non-normal data: Is anova still a valid option?
+\newblock {\em Psicothema}, 29(4):552--557.
+
+\bibitem[Swihart and Lindsey, 2020]{rmutil}
+Swihart, B. and Lindsey, J. (2020).
+\newblock {\em rmutil: Utilities for Nonlinear Regression and Repeated
+  Measurements Models}.
+\newblock R package version 1.1.5.
+
+\end{thebibliography}
