@@ -522,6 +522,7 @@ plotResiduals(model3)
   \begin{enumerate}
     \item Plot the data simulated below. Assess the linear relationship.
 <<warning=FALSE,message=FALSE>>=
+
 library(tidyverse)
 set.seed(7272)
 n<-50
@@ -578,24 +579,44 @@ ggdat <- rbind(ggdat,     # original data
     \item Briefly summarize how adding this data point affects parts (a)-(g).
     <<>>=
 ggplot(ggdat, aes(x=x, y=y))+
-  geom_smooth(color="black",
+  geom_smooth(color="blue",
               method="lm",
               formula=y~x)+
   geom_point(shape=1,
              alpha=.3)+
   theme_bw()
-
+#there is one unusually small observation!
 four.model<-lm(y~x, data=ggdat)
-summary(four.model)
+four.model.r <- rlm(y~x, data=ggdat)
+plotResiduals(four.model)
+summary(four.model.r)
 @
     \item Add the resulting regression line to the plot in part (d) in blue.
     <<>>=
+#5.2+(2.06*x)
+#10.742+(1.891*x)
+
+ggdat.final <- ggdat %>%
+  mutate(beforeAdding = 5.2+(2.06*x),
+         afterAdding = 10.742+(1.891*x))%>%
+  pivot_longer(cols=ends_with("Adding"),
+               names_to="Plot",
+               values_to="Pred")
+
+
+ggplot(ggdat.final, aes(x=x, y=Pred))+
+  geom_smooth(aes(color=Plot),
+              method="lm",
+              formula=y~x)+
+  geom_point(aes(y=y), shape=1,
+             alpha=.3)
 
 @
     \item Refit this model using several robust techniques for dealing with the
     bad observation. Create a plot that summarizes all the approaches taken, and 
     use a metric to select the best model.
     <<>>=
+
 
 @
   \end{enumerate}
