@@ -45,16 +45,7 @@ reached an A1C under 7\%, noting higher A1C is indicative of higher risk of hear
 significant difference among the treatments.
 
 <<>>=
-"1) To begin with, we don't know their baseline, so we can't really assess 
-the level of change that they went through."
-
-"2) We'd need to see either a control group to compare the level of effect between
-different pills. Or we need to see the base levels of A1C that they started with, and then
-we can do t-test to assess if the changes that we're observing are statistically significant.
-
-We'd need a baseline to run an ANOVA to assess if there are significant differences between
-the original state of the patients and the power of change between the different treatments. 
-"
+"To assess any significant difference we need ot run a t-sample proportion test, but since we only have the information on the proportion of the people seeing beneficial affect in the above question, it is not sufficient information"
 @
 \item The statement on Ozempic's website comes from a phase 3a randomized double-blind study. 
 \cite{Ahren17} reports that 409 received Ozempic (0.5 mg), 409 received Ozempic (1 mg), and 407 
@@ -68,10 +59,23 @@ received Januvia (100 mg).
 #Mean baseline HbA1c was 8·1%
 #2)
 
-"(estimated treatment difference vs sitagliptin -0·77% [95% CI -0·92 to -0·62] 
-with semaglutide 0·5 mg and -1·06% [-1·21 to -0·91] 
-with semaglutide 1·0 mg; p<0·0001 for non-inferiority 
-and for superiority, for both semaglutide doses vs sitagliptin"
+### Remember to write about the assumptions of doing t-sample prop.test#####
+# Successful and total cases for 0.5 mg Ozempic
+x1 = round(0.66*409)
+n1 = 409
+
+# Successful and total cases for 1 mg Ozempic
+x2 = round(0.73*409)
+n2 = 409
+
+# Successful and total cases for 100 mg Januvia
+x3 = round(0.4*407)
+n3 = 407
+
+prop.test(x = c(x1, x2, x3), n = c(n1, n2, n3))
+
+# There is a significant p-value to support a difference ()
+
 
 #t sample proportion test
 #DO IT
@@ -80,7 +84,11 @@ and for superiority, for both semaglutide doses vs sitagliptin"
   \item Perform a follow-up analysis for comparing treatments. If you were at high risk for 
   cardiovascular events, which medication would you want to take.
 <<>>=
+pairwise.prop.test(x = c(x1, x2, x3), n = c(n1, n2, n3))
 
+# There is a significant difference between 2 and 3 and 1 and 3 success proportions. So
+# 1 and 2 are better than 3. But if we have alpha = 0.05 then there is also a significant 
+# difference between 1 and 2, in which case 2 (1 mg of Ozempic) is better.
 @
 
 

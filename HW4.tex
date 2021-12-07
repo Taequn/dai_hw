@@ -98,23 +98,10 @@ significant difference among the treatments.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstr{"1) To begin with, we don't know their baseline, so we can't really assess 
-the level of change that they went through."}
+\hlstr{"To assess any significant difference we need ot run a t-sample proportion test, but since we only have the information on the proportion of the people seeing beneficial affect in the above question, it is not sufficient information"}
 \end{alltt}
 \begin{verbatim}
-## [1] "1) To begin with, we don't know their baseline, so we can't really assess \nthe level of change that they went through."
-\end{verbatim}
-\begin{alltt}
-\hlstr{"2) We'd need to see either a control group to compare the level of effect between
-different pills. Or we need to see the base levels of A1C that they started with, and then
-we can do t-test to assess if the changes that we're observing are statistically significant.
-
-We'd need a baseline to run an ANOVA to assess if there are significant differences between
-the original state of the patients and the power of change between the different treatments. 
-"}
-\end{alltt}
-\begin{verbatim}
-## [1] "2) We'd need to see either a control group to compare the level of effect between\ndifferent pills. Or we need to see the base levels of A1C that they started with, and then\nwe can do t-test to assess if the changes that we're observing are statistically significant.\n\nWe'd need a baseline to run an ANOVA to assess if there are significant differences between\nthe original state of the patients and the power of change between the different treatments. \n"
+## [1] "To assess any significant difference we need ot run a t-sample proportion test, but since we only have the information on the proportion of the people seeing beneficial affect in the above question, it is not sufficient information"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -132,15 +119,37 @@ received Januvia (100 mg).
 \hlcom{#Mean baseline HbA1c was 8·1%}
 \hlcom{#2)}
 
-\hlstr{"(estimated treatment difference vs sitagliptin -0·77% [95% CI -0·92 to -0·62] 
-with semaglutide 0·5 mg and -1·06% [-1·21 to -0·91] 
-with semaglutide 1·0 mg; p<0·0001 for non-inferiority 
-and for superiority, for both semaglutide doses vs sitagliptin"}
+\hlcom{### Remember to write about the assumptions of doing t-sample prop.test#####}
+\hlcom{# Successful and total cases for 0.5 mg Ozempic}
+\hlstd{x1} \hlkwb{=} \hlkwd{round}\hlstd{(}\hlnum{0.66}\hlopt{*}\hlnum{409}\hlstd{)}
+\hlstd{n1} \hlkwb{=} \hlnum{409}
+
+\hlcom{# Successful and total cases for 1 mg Ozempic}
+\hlstd{x2} \hlkwb{=} \hlkwd{round}\hlstd{(}\hlnum{0.73}\hlopt{*}\hlnum{409}\hlstd{)}
+\hlstd{n2} \hlkwb{=} \hlnum{409}
+
+\hlcom{# Successful and total cases for 100 mg Januvia}
+\hlstd{x3} \hlkwb{=} \hlkwd{round}\hlstd{(}\hlnum{0.4}\hlopt{*}\hlnum{407}\hlstd{)}
+\hlstd{n3} \hlkwb{=} \hlnum{407}
+
+\hlkwd{prop.test}\hlstd{(}\hlkwc{x} \hlstd{=} \hlkwd{c}\hlstd{(x1, x2, x3),} \hlkwc{n} \hlstd{=} \hlkwd{c}\hlstd{(n1, n2, n3))}
 \end{alltt}
 \begin{verbatim}
-## [1] "(estimated treatment difference vs sitagliptin -0·77% [95% CI -0·92 to -0·62] \nwith semaglutide 0·5 mg and -1·06% [-1·21 to -0·91] \nwith semaglutide 1·0 mg; p<0·0001 for non-inferiority \nand for superiority, for both semaglutide doses vs sitagliptin"
+## 
+## 	3-sample test for equality of proportions without continuity
+## 	correction
+## 
+## data:  c(x1, x2, x3) out of c(n1, n2, n3)
+## X-squared = 102.7, df = 2, p-value < 2.2e-16
+## alternative hypothesis: two.sided
+## sample estimates:
+##    prop 1    prop 2    prop 3 
+## 0.6601467 0.7310513 0.4004914
 \end{verbatim}
 \begin{alltt}
+\hlcom{# There is a significant p-value to support a difference ()}
+
+
 \hlcom{#t sample proportion test}
 \hlcom{#DO IT}
 \end{alltt}
@@ -148,7 +157,30 @@ and for superiority, for both semaglutide doses vs sitagliptin"}
 \end{knitrout}
   \item Perform a follow-up analysis for comparing treatments. If you were at high risk for 
   cardiovascular events, which medication would you want to take.
-
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{pairwise.prop.test}\hlstd{(}\hlkwc{x} \hlstd{=} \hlkwd{c}\hlstd{(x1, x2, x3),} \hlkwc{n} \hlstd{=} \hlkwd{c}\hlstd{(n1, n2, n3))}
+\end{alltt}
+\begin{verbatim}
+## 
+## 	Pairwise comparisons using Pairwise comparison of proportions 
+## 
+## data:  c(x1, x2, x3) out of c(n1, n2, n3) 
+## 
+##   1       2      
+## 2 0.033   -      
+## 3 3.6e-13 < 2e-16
+## 
+## P value adjustment method: holm
+\end{verbatim}
+\begin{alltt}
+\hlcom{# There is a significant difference between 2 and 3 and 1 and 3 success proportions. So}
+\hlcom{# 1 and 2 are better than 3. But if we have alpha = 0.05 then there is also a significant }
+\hlcom{# difference between 1 and 2, in which case 2 (1 mg of Ozempic) is better.}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
 
 \end{enumerate}
@@ -199,7 +231,7 @@ under a given condition (or broken assumption) we can just simulate it!
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# -- Attaching packages --------------------------------------- tidyverse 1.3.1 --}}
 
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# v ggplot2 3.3.4 \ \ \ \ v purrr \ \ 0.3.4\\\#\# v tibble \ 3.1.2 \ \ \ \ v dplyr \ \ 1.0.7\\\#\# v tidyr \ \ 1.1.3 \ \ \ \ v stringr 1.4.0\\\#\# v readr \ \ 1.4.0 \ \ \ \ v forcats 0.5.1}}
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# v ggplot2 3.3.5 \ \ \ \ v purrr \ \ 0.3.4\\\#\# v tibble \ 3.1.4 \ \ \ \ v dplyr \ \ 1.0.7\\\#\# v tidyr \ \ 1.1.3 \ \ \ \ v stringr 1.4.0\\\#\# v readr \ \ 2.0.1 \ \ \ \ v forcats 0.5.1}}
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# -- Conflicts ------------------------------------------ tidyverse\_conflicts() --\\\#\# x dplyr::filter() \ masks stats::filter()\\\#\# x dplyr::lag() \ \ \ \ masks stats::lag()\\\#\# x tidyr::nesting() masks rmutil::nesting()}}\begin{alltt}
 \hlstd{ggdat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{x}\hlstd{=}\hlkwd{seq}\hlstd{(}\hlopt{-}\hlnum{5}\hlstd{,} \hlnum{5}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{5000}\hlstd{))}\hlopt{%>%}
@@ -343,7 +375,7 @@ under a given condition (or broken assumption) we can just simulate it!
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.03
+## [1] 0.02
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -357,7 +389,7 @@ under a given condition (or broken assumption) we can just simulate it!
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.17
+## [1] 0.09
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -368,13 +400,13 @@ under a given condition (or broken assumption) we can just simulate it!
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{15}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.08
+## [1] 0.04
 \end{verbatim}
 \begin{alltt}
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{15}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.44
+## [1] 0.5
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -386,13 +418,13 @@ under a given condition (or broken assumption) we can just simulate it!
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{50}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.06
+## [1] 0.05
 \end{verbatim}
 \begin{alltt}
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{50}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.98
+## [1] 1
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -413,7 +445,7 @@ this simulation.
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{rand.n}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.98
+## [1] 0.95
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -428,13 +460,13 @@ this simulation.
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{rand.n}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{rand.s}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.34
+## [1] 0.1
 \end{verbatim}
 \begin{alltt}
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{rand.n}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{rand.s}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.65
+## [1] 0.1
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -957,7 +989,7 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \hlkwd{cor}\hlstd{(x, y2,} \hlkwc{method}\hlstd{=}\hlstr{"pearson"}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.9219955
+## [1] 0.9086291
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -1062,6 +1094,7 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
+\hlkwd{library}\hlstd{(patchwork)}
 \hlstd{model1} \hlkwb{<-} \hlkwd{lm}\hlstd{(y2}\hlopt{~}\hlstd{x)}
 \hlkwd{plotResiduals}\hlstd{(model1)}
 \end{alltt}
@@ -1069,9 +1102,9 @@ the image as a .pdf so you can load it instead of rerunning the code.
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'qqplotr'}}
 
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:ggplot2':\\\#\# \\\#\# \ \ \ \ stat\_qq\_line, StatQqLine}}
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in p1 | p4: operations are possible only for numeric, logical or complex types}}\begin{alltt}
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:ggplot2':\\\#\# \\\#\# \ \ \ \ stat\_qq\_line, StatQqLine}}\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-15-1} 
+\begin{kframe}\begin{alltt}
 \hlcom{#Variance is the same}
 \hlcom{#https://uc-r.github.io/assumptions_homogeneity#visualization}
 \end{alltt}
@@ -1102,7 +1135,7 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \hlkwd{cor}\hlstd{(x, y3,} \hlkwc{method}\hlstd{=}\hlstr{"pearson"}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.9623532
+## [1] 0.9568558
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -1116,9 +1149,9 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \hlstd{model2} \hlkwb{<-} \hlkwd{lm}\hlstd{(y3}\hlopt{~}\hlstd{x)}
 \hlkwd{plotResiduals}\hlstd{(model2)}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in p1 | p4: operations are possible only for numeric, logical or complex types}}\begin{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-17-1} 
+\begin{kframe}\begin{alltt}
 \hlcom{#It's a skewed normal dist, but it's not homogeneous.}
 \end{alltt}
 \end{kframe}
@@ -1155,9 +1188,8 @@ in relation to the model of part (b).
 \hlstd{model3} \hlkwb{<-} \hlkwd{lm}\hlstd{(y4}\hlopt{~}\hlstd{x4)}
 \hlkwd{plotResiduals}\hlstd{(model3)}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in p1 | p4: operations are possible only for numeric, logical or complex types}}\end{kframe}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-19-1} 
 \end{knitrout}
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1216,12 +1248,12 @@ in relation to the model of part (b).
 ## F-statistic:  7724 on 1 and 48 DF,  p-value: < 2.2e-16
 \end{verbatim}
 \begin{alltt}
-\hlcom{#hat(B)\{0\}=-2.191060}
-\hlcom{#hat(B)\{1\}\{x\}=0.482309}
+\hlcom{#hat(B)\{0\}=5.22}
+\hlcom{#hat(B)\{1\}\{x\}=2.06}
 
-\hlcom{#hat(Y)=-2.191060+0.482309x}
+\hlcom{#hat(Y)=-5.22+2.06x}
 
-\hlcom{#Prediction = -2.191060+0.482309(x) + (random error)}
+\hlcom{#Prediction = 5.22+2.06(x) + (random error)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1250,9 +1282,21 @@ in relation to the model of part (b).
 \end{kframe}
 \end{knitrout}
     \item Interpret the overall $F$ test of the model.
-
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#Look at p-value}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
     \item Interpret the coefficients of the model; are they what you would expect?
-
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#Yeah, that's easy.}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
     \item Now, let's add a bad datapoint to the data.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -1264,10 +1308,67 @@ in relation to the model of part (b).
 \end{knitrout}
   \begin{enumerate}
     \item Briefly summarize how adding this data point affects parts (a)-(g).
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y))}\hlopt{+}
+  \hlkwd{geom_smooth}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"blue"}\hlstd{,}
+          \hlkwc{method}\hlstd{=}\hlstr{"lm"}\hlstd{,}
+          \hlkwc{formula}\hlstd{=y}\hlopt{~}\hlstd{x)}\hlopt{+}
+  \hlkwd{geom_point}\hlstd{(}\hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,}
+         \hlkwc{alpha}\hlstd{=}\hlnum{.3}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-28-1} 
+\begin{kframe}\begin{alltt}
+\hlcom{#there is one unusually small observation!}
+\hlstd{four.model}\hlkwb{<-}\hlkwd{lm}\hlstd{(y}\hlopt{~}\hlstd{x,} \hlkwc{data}\hlstd{=ggdat)}
+\hlstd{four.model.r} \hlkwb{<-} \hlkwd{rlm}\hlstd{(y}\hlopt{~}\hlstd{x,} \hlkwc{data}\hlstd{=ggdat)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in rlm(y \textasciitilde{} x, data = ggdat): could not find function "{}rlm"{}}}\begin{alltt}
+\hlkwd{plotResiduals}\hlstd{(four.model)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-28-2} 
+\begin{kframe}\begin{alltt}
+\hlkwd{summary}\hlstd{(four.model.r)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in summary(four.model.r): object 'four.model.r' not found}}\end{kframe}
+\end{knitrout}
     \item Add the resulting regression line to the plot in part (d) in blue.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#5.2+(2.06*x)}
+\hlcom{#10.742+(1.891*x)}
+
+\hlstd{ggdat.final} \hlkwb{<-} \hlstd{ggdat} \hlopt{%>%}
+  \hlkwd{mutate}\hlstd{(}\hlkwc{beforeAdding} \hlstd{=} \hlnum{5.2}\hlopt{+}\hlstd{(}\hlnum{2.06}\hlopt{*}\hlstd{x),}
+     \hlkwc{afterAdding} \hlstd{=} \hlnum{10.742}\hlopt{+}\hlstd{(}\hlnum{1.891}\hlopt{*}\hlstd{x))}\hlopt{%>%}
+  \hlkwd{pivot_longer}\hlstd{(}\hlkwc{cols}\hlstd{=}\hlkwd{ends_with}\hlstd{(}\hlstr{"Adding"}\hlstd{),}
+           \hlkwc{names_to}\hlstd{=}\hlstr{"Plot"}\hlstd{,}
+           \hlkwc{values_to}\hlstd{=}\hlstr{"Pred"}\hlstd{)}
+
+
+\hlkwd{ggplot}\hlstd{(ggdat.final,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=Pred))}\hlopt{+}
+  \hlkwd{geom_smooth}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{color}\hlstd{=Plot),}
+          \hlkwc{method}\hlstd{=}\hlstr{"lm"}\hlstd{,}
+          \hlkwc{formula}\hlstd{=y}\hlopt{~}\hlstd{x)}\hlopt{+}
+  \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=y),} \hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,}
+         \hlkwc{alpha}\hlstd{=}\hlnum{.3}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-29-1} 
+\end{knitrout}
     \item Refit this model using several robust techniques for dealing with the
     bad observation. Create a plot that summarizes all the approaches taken, and 
     use a metric to select the best model.
+
   \end{enumerate}
   \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
