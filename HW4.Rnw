@@ -117,10 +117,7 @@ under a given condition (or broken assumption) we can just simulate it!
   the graph of the Gaussian distribution with $\mu=0$ and $\sigma=2$. Comment
   on the differences you see and what you think might happen if the data 
   are Laplace distributed instead of the Gaussian distribution.
-  \item Conduct a simulation study using the Laplace distribution. To do so, 
-  complete the following 1000 times and report the proportion of times the
-  data lead to a rejection of the null hypothesis.\\
-<<>>=
+  <<warning=FALSE, alert=FALSE, message=FALSE>>=
 library(rmutil)
 library(tidyverse)
 
@@ -133,6 +130,9 @@ ggplot(ggdat, aes(x=x, y=f))+
   geom_line(color="blue")+
   geom_line(aes(y=f1), color="red")
 @
+  \item Conduct a simulation study using the Laplace distribution. To do so, 
+  complete the following 1000 times and report the proportion of times the
+  data lead to a rejection of the null hypothesis.\\
   
   The most efficient way to complete this question (including the other parts)
   is to write a function that completes the following. 
@@ -168,7 +168,7 @@ ggplot(ggdat, aes(x=x, y=f))+
     Comment on the results of this simulation completed in the default case where
   $m_1=m_2=m_3=m_4=0$, $s_1=s_2=s_3=s_4=2$, and $n_1=n_2=n_3=n_4=5$
   
-<<warning=FALSE>>=
+<<warning=FALSE, alert=FALSE, message=FALSE>>=
 library(rstatix)
 aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5, loop=0,
                     welch=FALSE){
@@ -261,13 +261,13 @@ aovFunc(loop=100)
 aovFunc(equal.m=FALSE, loop=100)
 @
 \item Repeat the simulation study in (b-c), except with $n=15$. Comment on the results of this simulation.
-<<warning=FALSE>>=
+<<warning=FALSE, alert=FALSE, message=FALSE>>=
 aovFunc(equal.m=TRUE, loop=100, n=15)
 aovFunc(equal.m=FALSE, loop=100, n=15)
 @
   \item Repeat the simulation study in (b-c), except with $n=50$.
   Comment on the results of this simulation.
-<<warning=FALSE>>=
+<<warning=FALSE,alert=FALSE, message=FALSE>>=
 aovFunc(equal.m=TRUE, loop=100, n=50)
 aovFunc(equal.m=FALSE, loop=100, n=50)
 @
@@ -345,7 +345,7 @@ ggplot(ggdat, aes(x=x, y=y))+
               method="lm",
               formula=y~x)+
   geom_point(shape=1,
-             alpha=.3)
+             alpha=.3)+
   theme_bw()
   #put pearson on the plot
 @
@@ -364,19 +364,20 @@ ggplot(ggdat, aes(x=x, y=y))+
              alpha=.3)+
   theme_bw()
   #put pearson on the plot
-cor(x, y2, method="pearson")
+#cor(x, y2, method="pearson")
 
 @
   \item In the model of part (b), evaluate the normality and homogeneity of error terms. Note 
   that we know both of these items to be true since we've taken $\epsilon \sim 
   \textrm{N}(\mu=0,\sigma=3)$.
 <<>>=
-#not stealing your function, prof. c:
+#Preparing the functions!
+library(patchwork)
 source("https://cipolli.com/students/code/plotResiduals.R")
+source("https://cipolli.com/students/code/plotInfluence.R")
 @
 
-  <<>>=
-library(patchwork)
+  <<warning=FALSE, alert=FALSE, message=FALSE>>=
 model1 <- lm(y2~x)
 plotResiduals(model1)
 #Variance is the same
@@ -407,7 +408,7 @@ cor(x, y3, method="pearson")
   <<>>=
 model2 <- lm(y3~x)
 plotResiduals(model2)
-#It's a skewed normal dist, but it's not homogeneous.
+#It's a skewed normal dist, but it's homogeneous.
 @
 \item Fit a model to the following simulated data, now with added Heteroskedastic
 normal error. Make observations about the model equation and the Pearson correlation
@@ -443,7 +444,7 @@ plotResiduals(model3)
 \item Consider the following simulation.
   \begin{enumerate}
     \item Plot the data simulated below. Assess the linear relationship.
-<<warning=FALSE,message=FALSE>>=
+<<warning=FALSE, alert=FALSE, message=FALSE>>=
 
 library(tidyverse)
 set.seed(7272)
@@ -500,18 +501,20 @@ ggdat <- rbind(ggdat,     # original data
   \begin{enumerate}
     \item Briefly summarize how adding this data point affects parts (a)-(g).
     <<>>=
-ggplot(ggdat, aes(x=x, y=y))+
-  geom_smooth(color="blue",
-              method="lm",
-              formula=y~x)+
-  geom_point(shape=1,
-             alpha=.3)+
-  theme_bw()
+#ggplot(ggdat, aes(x=x, y=y))+
+#  geom_smooth(color="blue",
+#              method="lm",
+#              formula=y~x)+
+#  geom_point(shape=1,
+#             alpha=.3)+
+#  theme_bw()
 #there is one unusually small observation!
 four.model<-lm(y~x, data=ggdat)
-four.model.r <- rlm(y~x, data=ggdat)
 plotResiduals(four.model)
-summary(four.model.r)
+@
+
+<<>>=
+plotInfluence(four.model)
 @
     \item Add the resulting regression line to the plot in part (d) in blue.
     <<>>=
@@ -531,14 +534,82 @@ ggplot(ggdat.final, aes(x=x, y=Pred))+
               method="lm",
               formula=y~x)+
   geom_point(aes(y=y), shape=1,
-             alpha=.3)
+             alpha=.3)+
+  scale_color_manual(values=c("black", "blue"))
 
 @
     \item Refit this model using several robust techniques for dealing with the
     bad observation. Create a plot that summarizes all the approaches taken, and 
     use a metric to select the best model.
-    <<>>=
+    <<warning=FALSE, alert=FALSE, message=FALSE>>=
+library(MASS)
+library(sfsmisc)
+#Hubert
+#6.0391 + (2.0421 * x)
+mod.hubert <- rlm(y ~ x, data=ggdat,
+                  psi=psi.huber)
+summary(mod.hubert)
+f.robftest(mod.hubert, var="x")
 
+@
+
+<<>>=
+#5.7016 + (2.0504 * x)
+mod.bisquare<-rlm(y ~ x, data=ggdat,
+                  psi=psi.bisquare)
+
+summary(mod.bisquare)
+f.robftest(mod.bisquare, var="x")
+@
+
+<<>>=
+library(quantreg)
+#5.52 + (2.05*x)
+mod.quant <- rq(y~x, data=ggdat)
+summary(mod.quant, se = "ker")
+@
+
+<<>>=
+#6.0391 + (2.0421 * x) — Huber
+#5.7016 + (2.0504 * x) — Bisquare
+#5.52 + (2.05*x) — Quantile
+
+ggdat.compare <- ggdat %>%
+  mutate(original_reg = 5.2+(2.06*x),
+         OLS_reg = 10.742+(1.891*x),
+         Huber_reg = 6.0391 + (2.0421 * x),
+         Bisquare_reg = 5.7016 + (2.0504 * x),
+         Quantile_reg = 5.52 + (2.05*x),
+         Population_reg = 3.5+(2.1*x))%>%
+  pivot_longer(cols=ends_with("_reg"),
+               names_to="Plot",
+               values_to="Pred")
+
+
+ggplot(ggdat.compare, aes(x=x, y=Pred))+
+  geom_smooth(aes(color=Plot),
+              method="lm",
+              formula=y~x)+
+  geom_point(aes(y=y), shape=1,
+             alpha=.3)+
+  scale_color_manual(values=c("black", "blue", "green", "red", "yellow", "purple"))
+@
+
+<<>>=
+library(Metrics)
+
+#rmse(ggdat$y, predict(mod.quant))
+#rmse(ggdat$y, predict(mod.hubert))
+#rmse(ggdat$y, predict(mod.bisquare))
+
+
+#rmse(test1, test2)
+@
+
+<<>>=
+#test1
+#test2
+#rmse(ggdat$y, predict(mod.hubert))
 
 @
   \end{enumerate}

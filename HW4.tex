@@ -208,44 +208,27 @@ under a given condition (or broken assumption) we can just simulate it!
   the graph of the Gaussian distribution with $\mu=0$ and $\sigma=2$. Comment
   on the differences you see and what you think might happen if the data 
   are Laplace distributed instead of the Gaussian distribution.
-  \item Conduct a simulation study using the Laplace distribution. To do so, 
-  complete the following 1000 times and report the proportion of times the
-  data lead to a rejection of the null hypothesis.\\
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{library}\hlstd{(rmutil)}
-\end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'rmutil'}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:stats':\\\#\# \\\#\# \ \ \ \ nobs}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:base':\\\#\# \\\#\# \ \ \ \ as.data.frame, units}}\begin{alltt}
 \hlkwd{library}\hlstd{(tidyverse)}
-\end{alltt}
 
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Registered S3 method overwritten by 'httr':\\\#\# \ \ method \ \ \ \ \ \ \ \ from \ \\\#\# \ \ print.response rmutil}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# -- Attaching packages --------------------------------------- tidyverse 1.3.1 --}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# v ggplot2 3.3.5 \ \ \ \ v purrr \ \ 0.3.4\\\#\# v tibble \ 3.1.4 \ \ \ \ v dplyr \ \ 1.0.7\\\#\# v tidyr \ \ 1.1.3 \ \ \ \ v stringr 1.4.0\\\#\# v readr \ \ 2.0.1 \ \ \ \ v forcats 0.5.1}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# -- Conflicts ------------------------------------------ tidyverse\_conflicts() --\\\#\# x dplyr::filter() \ masks stats::filter()\\\#\# x dplyr::lag() \ \ \ \ masks stats::lag()\\\#\# x tidyr::nesting() masks rmutil::nesting()}}\begin{alltt}
 \hlstd{ggdat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{x}\hlstd{=}\hlkwd{seq}\hlstd{(}\hlopt{-}\hlnum{5}\hlstd{,} \hlnum{5}\hlstd{,} \hlkwc{length.out}\hlstd{=}\hlnum{5000}\hlstd{))}\hlopt{%>%}
-  \hlkwd{mutate}\hlstd{(}\hlkwc{f}\hlstd{=}\hlkwd{dlaplace}\hlstd{(x,} \hlkwc{m}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{s}\hlstd{=}\hlnum{2}\hlstd{),}
-         \hlkwc{f1}\hlstd{=}\hlkwd{dnorm}\hlstd{(x,} \hlkwc{mean}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{2}\hlstd{))}
+\hlkwd{mutate}\hlstd{(}\hlkwc{f}\hlstd{=}\hlkwd{dlaplace}\hlstd{(x,} \hlkwc{m}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{s}\hlstd{=}\hlnum{2}\hlstd{),}
+       \hlkwc{f1}\hlstd{=}\hlkwd{dnorm}\hlstd{(x,} \hlkwc{mean}\hlstd{=}\hlnum{0}\hlstd{,} \hlkwc{sd}\hlstd{=}\hlnum{2}\hlstd{))}
 
 \hlcom{#set the legend}
 \hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=f))}\hlopt{+}
-  \hlkwd{geom_line}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"blue"}\hlstd{)}\hlopt{+}
-  \hlkwd{geom_line}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=f1),} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
+\hlkwd{geom_line}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"blue"}\hlstd{)}\hlopt{+}
+\hlkwd{geom_line}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=f1),} \hlkwc{color}\hlstd{=}\hlstr{"red"}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-4-1} 
 \end{knitrout}
+  \item Conduct a simulation study using the Laplace distribution. To do so, 
+  complete the following 1000 times and report the proportion of times the
+  data lead to a rejection of the null hypothesis.\\
   
   The most efficient way to complete this question (including the other parts)
   is to write a function that completes the following. 
@@ -285,12 +268,6 @@ under a given condition (or broken assumption) we can just simulate it!
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{library}\hlstd{(rstatix)}
-\end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'rstatix'}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:stats':\\\#\# \\\#\# \ \ \ \ filter}}\begin{alltt}
 \hlstd{aovFunc} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{rand.n}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{rand.s}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{equal.m}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{5}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{0}\hlstd{,}
                     \hlkwc{welch}\hlstd{=}\hlnum{FALSE}\hlstd{)\{}
   \hlstd{alpha}\hlkwb{<-}\hlnum{0.05}
@@ -375,7 +352,7 @@ under a given condition (or broken assumption) we can just simulate it!
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.02
+## [1] 0.03
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -389,7 +366,7 @@ under a given condition (or broken assumption) we can just simulate it!
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.09
+## [1] 0.22
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -400,13 +377,13 @@ under a given condition (or broken assumption) we can just simulate it!
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{15}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.04
+## [1] 0.07
 \end{verbatim}
 \begin{alltt}
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{15}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.5
+## [1] 0.46
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -418,7 +395,7 @@ under a given condition (or broken assumption) we can just simulate it!
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{50}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.05
+## [1] 0.04
 \end{verbatim}
 \begin{alltt}
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{,} \hlkwc{n}\hlstd{=}\hlnum{50}\hlstd{)}
@@ -439,13 +416,13 @@ this simulation.
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{rand.n}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.05
+## [1] 0.07
 \end{verbatim}
 \begin{alltt}
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{rand.n}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.95
+## [1] 0.98
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -460,13 +437,13 @@ this simulation.
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{rand.n}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{rand.s}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.1
+## [1] 0.02
 \end{verbatim}
 \begin{alltt}
 \hlkwd{aovFunc}\hlstd{(}\hlkwc{equal.m}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{rand.n}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{rand.s}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{loop}\hlstd{=}\hlnum{100}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.1
+## [1] 0.61
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -531,436 +508,12 @@ the image as a .pdf so you can load it instead of rerunning the code.
               \hlkwc{method}\hlstd{=}\hlstr{"lm"}\hlstd{,}
               \hlkwc{formula}\hlstd{=y}\hlopt{~}\hlstd{x)}\hlopt{+}
   \hlkwd{geom_point}\hlstd{(}\hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,}
-             \hlkwc{alpha}\hlstd{=}\hlnum{.3}\hlstd{)}
+             \hlkwc{alpha}\hlstd{=}\hlnum{.3}\hlstd{)}\hlopt{+}
+  \hlkwd{theme_bw}\hlstd{()}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-12-1} 
 \begin{kframe}\begin{alltt}
-  \hlkwd{theme_bw}\hlstd{()}
-\end{alltt}
-\begin{verbatim}
-## List of 93
-##  $ line                      :List of 6
-##   ..$ colour       : chr "black"
-##   ..$ size         : num 0.5
-##   ..$ linetype     : num 1
-##   ..$ lineend      : chr "butt"
-##   ..$ arrow        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ rect                      :List of 5
-##   ..$ fill         : chr "white"
-##   ..$ colour       : chr "black"
-##   ..$ size         : num 0.5
-##   ..$ linetype     : num 1
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ text                      :List of 11
-##   ..$ family       : chr ""
-##   ..$ face         : chr "plain"
-##   ..$ colour       : chr "black"
-##   ..$ size         : num 11
-##   ..$ hjust        : num 0.5
-##   ..$ vjust        : num 0.5
-##   ..$ angle        : num 0
-##   ..$ lineheight   : num 0.9
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ title                     : NULL
-##  $ aspect.ratio              : NULL
-##  $ axis.title                : NULL
-##  $ axis.title.x              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 2.75points 0points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.x.top          :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 0
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 2.75points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.x.bottom       : NULL
-##  $ axis.title.y              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 1
-##   ..$ angle        : num 90
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 2.75points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.y.left         : NULL
-##  $ axis.title.y.right        :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 0
-##   ..$ angle        : num -90
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 2.75points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text                 :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : chr "grey30"
-##   ..$ size         : 'rel' num 0.8
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x               :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 2.2points 0points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x.top           :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 0
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 2.2points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x.bottom        : NULL
-##  $ axis.text.y               :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 1
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 2.2points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.y.left          : NULL
-##  $ axis.text.y.right         :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 0
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 2.2points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.ticks                :List of 6
-##   ..$ colour       : chr "grey20"
-##   ..$ size         : NULL
-##   ..$ linetype     : NULL
-##   ..$ lineend      : NULL
-##   ..$ arrow        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ axis.ticks.x              : NULL
-##  $ axis.ticks.x.top          : NULL
-##  $ axis.ticks.x.bottom       : NULL
-##  $ axis.ticks.y              : NULL
-##  $ axis.ticks.y.left         : NULL
-##  $ axis.ticks.y.right        : NULL
-##  $ axis.ticks.length         : 'simpleUnit' num 2.75points
-##   ..- attr(*, "unit")= int 8
-##  $ axis.ticks.length.x       : NULL
-##  $ axis.ticks.length.x.top   : NULL
-##  $ axis.ticks.length.x.bottom: NULL
-##  $ axis.ticks.length.y       : NULL
-##  $ axis.ticks.length.y.left  : NULL
-##  $ axis.ticks.length.y.right : NULL
-##  $ axis.line                 : list()
-##   ..- attr(*, "class")= chr [1:2] "element_blank" "element"
-##  $ axis.line.x               : NULL
-##  $ axis.line.x.top           : NULL
-##  $ axis.line.x.bottom        : NULL
-##  $ axis.line.y               : NULL
-##  $ axis.line.y.left          : NULL
-##  $ axis.line.y.right         : NULL
-##  $ legend.background         :List of 5
-##   ..$ fill         : NULL
-##   ..$ colour       : logi NA
-##   ..$ size         : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ legend.margin             : 'margin' num [1:4] 5.5points 5.5points 5.5points 5.5points
-##   ..- attr(*, "unit")= int 8
-##  $ legend.spacing            : 'simpleUnit' num 11points
-##   ..- attr(*, "unit")= int 8
-##  $ legend.spacing.x          : NULL
-##  $ legend.spacing.y          : NULL
-##  $ legend.key                :List of 5
-##   ..$ fill         : chr "white"
-##   ..$ colour       : logi NA
-##   ..$ size         : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ legend.key.size           : 'simpleUnit' num 1.2lines
-##   ..- attr(*, "unit")= int 3
-##  $ legend.key.height         : NULL
-##  $ legend.key.width          : NULL
-##  $ legend.text               :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 0.8
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ legend.text.align         : NULL
-##  $ legend.title              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 0
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ legend.title.align        : NULL
-##  $ legend.position           : chr "right"
-##  $ legend.direction          : NULL
-##  $ legend.justification      : chr "center"
-##  $ legend.box                : NULL
-##  $ legend.box.just           : NULL
-##  $ legend.box.margin         : 'margin' num [1:4] 0cm 0cm 0cm 0cm
-##   ..- attr(*, "unit")= int 1
-##  $ legend.box.background     : list()
-##   ..- attr(*, "class")= chr [1:2] "element_blank" "element"
-##  $ legend.box.spacing        : 'simpleUnit' num 11points
-##   ..- attr(*, "unit")= int 8
-##  $ panel.background          :List of 5
-##   ..$ fill         : chr "white"
-##   ..$ colour       : logi NA
-##   ..$ size         : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ panel.border              :List of 5
-##   ..$ fill         : logi NA
-##   ..$ colour       : chr "grey20"
-##   ..$ size         : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ panel.spacing             : 'simpleUnit' num 5.5points
-##   ..- attr(*, "unit")= int 8
-##  $ panel.spacing.x           : NULL
-##  $ panel.spacing.y           : NULL
-##  $ panel.grid                :List of 6
-##   ..$ colour       : chr "grey92"
-##   ..$ size         : NULL
-##   ..$ linetype     : NULL
-##   ..$ lineend      : NULL
-##   ..$ arrow        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ panel.grid.major          : NULL
-##  $ panel.grid.minor          :List of 6
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 0.5
-##   ..$ linetype     : NULL
-##   ..$ lineend      : NULL
-##   ..$ arrow        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ panel.grid.major.x        : NULL
-##  $ panel.grid.major.y        : NULL
-##  $ panel.grid.minor.x        : NULL
-##  $ panel.grid.minor.y        : NULL
-##  $ panel.ontop               : logi FALSE
-##  $ plot.background           :List of 5
-##   ..$ fill         : NULL
-##   ..$ colour       : chr "white"
-##   ..$ size         : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ plot.title                :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 1.2
-##   ..$ hjust        : num 0
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 5.5points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ plot.title.position       : chr "panel"
-##  $ plot.subtitle             :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 0
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 5.5points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ plot.caption              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 0.8
-##   ..$ hjust        : num 1
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 5.5points 0points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ plot.caption.position     : chr "panel"
-##  $ plot.tag                  :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 1.2
-##   ..$ hjust        : num 0.5
-##   ..$ vjust        : num 0.5
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ plot.tag.position         : chr "topleft"
-##  $ plot.margin               : 'margin' num [1:4] 5.5points 5.5points 5.5points 5.5points
-##   ..- attr(*, "unit")= int 8
-##  $ strip.background          :List of 5
-##   ..$ fill         : chr "grey85"
-##   ..$ colour       : chr "grey20"
-##   ..$ size         : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ strip.background.x        : NULL
-##  $ strip.background.y        : NULL
-##  $ strip.placement           : chr "inside"
-##  $ strip.text                :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : chr "grey10"
-##   ..$ size         : 'rel' num 0.8
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 4.4points 4.4points 4.4points 4.4points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ strip.text.x              : NULL
-##  $ strip.text.y              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : num -90
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ strip.switch.pad.grid     : 'simpleUnit' num 2.75points
-##   ..- attr(*, "unit")= int 8
-##  $ strip.switch.pad.wrap     : 'simpleUnit' num 2.75points
-##   ..- attr(*, "unit")= int 8
-##  $ strip.text.y.left         :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : num 90
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  - attr(*, "class")= chr [1:2] "theme" "gg"
-##  - attr(*, "complete")= logi TRUE
-##  - attr(*, "validate")= logi TRUE
-\end{verbatim}
-\begin{alltt}
   \hlcom{#put pearson on the plot}
 \end{alltt}
 \end{kframe}
@@ -986,11 +539,8 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-13-1} 
 \begin{kframe}\begin{alltt}
   \hlcom{#put pearson on the plot}
-\hlkwd{cor}\hlstd{(x, y2,} \hlkwc{method}\hlstd{=}\hlstr{"pearson"}\hlstd{)}
+\hlcom{#cor(x, y2, method="pearson")}
 \end{alltt}
-\begin{verbatim}
-## [1] 0.9086291
-\end{verbatim}
 \end{kframe}
 \end{knitrout}
   \item In the model of part (b), evaluate the normality and homogeneity of error terms. Note 
@@ -999,94 +549,10 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{#not stealing your function, prof. c:}
-\hlstd{plotResiduals}\hlkwb{<-}\hlkwa{function}\hlstd{(}\hlkwc{mod}\hlstd{)\{}
-  \hlstd{ggdat} \hlkwb{<-} \hlkwd{data.frame}\hlstd{(}\hlkwc{y.hat} \hlstd{=} \hlkwd{fitted}\hlstd{(mod),}
-                      \hlkwc{e} \hlstd{=} \hlkwd{residuals}\hlstd{(mod))}
-
-  \hlcom{########################################}
-  \hlcom{####  Fitted versus residuals}
-  \hlcom{########################################}
-  \hlstd{p1}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(}\hlkwc{data}\hlstd{=ggdat,}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=y.hat,}\hlkwc{y}\hlstd{=e))}\hlopt{+}
-    \hlkwd{geom_point}\hlstd{(}\hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{)}\hlopt{+}
-    \hlkwd{geom_hline}\hlstd{(}\hlkwc{yintercept}\hlstd{=}\hlnum{0}\hlstd{,}\hlkwc{linetype}\hlstd{=}\hlstr{"dashed"}\hlstd{)}\hlopt{+}
-    \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
-    \hlkwd{xlab}\hlstd{(}\hlkwd{bquote}\hlstd{(}\hlkwd{hat}\hlstd{(Y)))}\hlopt{+}
-    \hlkwd{ylab}\hlstd{(}\hlstr{"Residuals"}\hlstd{)}\hlopt{+}
-    \hlkwd{ggtitle}\hlstd{(}\hlstr{"Fitted Values versus the Residuals"}\hlstd{)}
-
-  \hlcom{########################################}
-  \hlcom{####  Histogram with Gaussian Density}
-  \hlcom{########################################}
-  \hlstd{ggdat.gaussian}\hlkwb{<-}\hlkwd{data.frame}\hlstd{(}\hlkwc{x}\hlstd{=}\hlkwd{seq}\hlstd{(}\hlkwd{min}\hlstd{(ggdat}\hlopt{$}\hlstd{e)}\hlopt{-}\hlkwd{sd}\hlstd{(ggdat}\hlopt{$}\hlstd{e),}
-                                   \hlkwd{max}\hlstd{(ggdat}\hlopt{$}\hlstd{e)}\hlopt{+}\hlkwd{sd}\hlstd{(ggdat}\hlopt{$}\hlstd{e),}\hlkwc{length.out} \hlstd{=} \hlnum{500}\hlstd{),}
-                             \hlkwc{f}\hlstd{=}\hlkwd{dnorm}\hlstd{(}\hlkwd{seq}\hlstd{(}\hlkwd{min}\hlstd{(ggdat}\hlopt{$}\hlstd{e)}\hlopt{-}\hlkwd{sd}\hlstd{(ggdat}\hlopt{$}\hlstd{e),}
-                                     \hlkwd{max}\hlstd{(ggdat}\hlopt{$}\hlstd{e)}\hlopt{+}\hlkwd{sd}\hlstd{(ggdat}\hlopt{$}\hlstd{e),}\hlkwc{length.out} \hlstd{=} \hlnum{500}\hlstd{),}
-                                     \hlcom{#ei should have mean zero}
-                                     \hlkwc{mean}\hlstd{=}\hlnum{0}\hlstd{,}
-                                     \hlcom{#ei should have common variance  }
-                                     \hlkwc{sd}\hlstd{=}\hlkwd{summary}\hlstd{(mod)}\hlopt{$}\hlstd{sigma),}
-                             \hlkwc{CDF}\hlstd{=}\hlkwd{pnorm}\hlstd{(}\hlkwd{seq}\hlstd{(}\hlkwd{min}\hlstd{(ggdat}\hlopt{$}\hlstd{e)}\hlopt{-}\hlkwd{sd}\hlstd{(ggdat}\hlopt{$}\hlstd{e),}
-                                         \hlkwd{max}\hlstd{(ggdat}\hlopt{$}\hlstd{e)}\hlopt{+}\hlkwd{sd}\hlstd{(ggdat}\hlopt{$}\hlstd{e),}\hlkwc{length.out} \hlstd{=} \hlnum{500}\hlstd{),}
-                                     \hlcom{#ei should have mean zero}
-                                     \hlkwc{mean}\hlstd{=}\hlnum{0}\hlstd{,}
-                                     \hlcom{#ei should have common variance  }
-                                     \hlkwc{sd}\hlstd{=}\hlkwd{summary}\hlstd{(mod)}\hlopt{$}\hlstd{sigma))}
-
-  \hlstd{d}\hlkwb{<-}\hlkwd{density}\hlstd{(ggdat}\hlopt{$}\hlstd{e)}
-  \hlstd{p2}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(}\hlkwc{data}\hlstd{=ggdat,}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=e))}\hlopt{+}
-    \hlkwd{geom_histogram}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=..density..),} \hlkwc{binwidth} \hlstd{= d}\hlopt{$}\hlstd{bw,}
-                   \hlkwc{fill}\hlstd{=}\hlstr{"lightblue"}\hlstd{,}\hlkwc{color}\hlstd{=}\hlstr{"black"}\hlstd{)}\hlopt{+}
-    \hlkwd{geom_density}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"Empirical"}\hlstd{),}\hlkwc{size}\hlstd{=}\hlnum{1}\hlstd{,}
-                 \hlkwc{trim}\hlstd{=F,}\hlkwc{show.legend} \hlstd{= F)}\hlopt{+}
-    \hlkwd{geom_line}\hlstd{(}\hlkwc{data}\hlstd{=ggdat.gaussian,}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,}\hlkwc{y}\hlstd{=f,}\hlkwc{color}\hlstd{=}\hlstr{"Gaussian-Assumed"}\hlstd{),}
-              \hlkwc{size}\hlstd{=}\hlnum{1}\hlstd{)}\hlopt{+}
-    \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
-    \hlkwd{xlab}\hlstd{(}\hlstr{"Residual"}\hlstd{)}\hlopt{+}
-    \hlkwd{ylab}\hlstd{(}\hlstr{"Density"}\hlstd{)}\hlopt{+}
-    \hlkwd{labs}\hlstd{(}\hlkwc{color} \hlstd{=} \hlstr{""}\hlstd{)}\hlopt{+}
-    \hlkwd{theme}\hlstd{(}\hlkwc{legend.position}\hlstd{=}\hlstr{"bottom"}\hlstd{)}\hlopt{+}
-    \hlkwd{ggtitle}\hlstd{(}\hlstr{"Residual Density"}\hlstd{)}
-
-  \hlcom{########################################}
-  \hlcom{####  Plot the residuals ecdf}
-  \hlcom{########################################}
-  \hlstd{e.cdf.func}\hlkwb{<-}\hlkwd{ecdf}\hlstd{(ggdat}\hlopt{$}\hlstd{e)}
-  \hlstd{e.cdf}\hlkwb{<-}\hlkwd{e.cdf.func}\hlstd{(}\hlkwd{sort}\hlstd{(ggdat}\hlopt{$}\hlstd{e))}
-
-  \hlstd{ggdat}\hlkwb{<-}\hlstd{ggdat} \hlopt{%>%} \hlkwd{mutate}\hlstd{(}\hlkwc{e.sort}\hlstd{=}\hlkwd{sort}\hlstd{(ggdat}\hlopt{$}\hlstd{e),}
-                   \hlkwc{e.cdf}\hlstd{=e.cdf)}
-
-  \hlstd{p3}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(}\hlkwc{data}\hlstd{=ggdat,}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=e.sort))}\hlopt{+}
-    \hlkwd{geom_line}\hlstd{(}\hlkwc{data}\hlstd{=ggdat.gaussian,}\hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,}\hlkwc{y}\hlstd{=CDF,}\hlkwc{color}\hlstd{=}\hlstr{"Gaussian-Assumed"}\hlstd{),}\hlkwc{size}\hlstd{=}\hlnum{1}\hlstd{)}\hlopt{+}
-    \hlkwd{geom_step}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=e.cdf,}\hlkwc{color}\hlstd{=}\hlstr{"Empirical"}\hlstd{),}\hlkwc{show.legend} \hlstd{= F,}\hlkwc{size}\hlstd{=}\hlnum{1}\hlstd{)}\hlopt{+}
-    \hlkwd{geom_hline}\hlstd{(}\hlkwc{yintercept}\hlstd{=}\hlnum{0}\hlstd{)}\hlopt{+}
-    \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
-    \hlkwd{xlab}\hlstd{(}\hlstr{"Residual"}\hlstd{)}\hlopt{+}
-    \hlkwd{ylab}\hlstd{(}\hlstr{"Cumulative Density"}\hlstd{)}\hlopt{+}
-    \hlkwd{labs}\hlstd{(}\hlkwc{color} \hlstd{=} \hlstr{""}\hlstd{)}\hlopt{+}
-    \hlkwd{theme}\hlstd{(}\hlkwc{legend.position}\hlstd{=}\hlstr{"bottom"}\hlstd{)}\hlopt{+}
-    \hlkwd{ggtitle}\hlstd{(}\hlstr{"Residual Cumulative Density"}\hlstd{)}
-
-  \hlcom{########################################}
-  \hlcom{####  QQplot of the residuals}
-  \hlcom{########################################}
-  \hlkwd{library}\hlstd{(}\hlstr{"qqplotr"}\hlstd{)}
-  \hlstd{p4}\hlkwb{<-}\hlkwd{ggplot}\hlstd{(}\hlkwc{data}\hlstd{=ggdat,}\hlkwd{aes}\hlstd{(}\hlkwc{sample}\hlstd{=}\hlkwd{scale}\hlstd{(e)))}\hlopt{+} \hlcom{#standardize e}
-    \hlkwd{stat_qq_band}\hlstd{(}\hlkwc{alpha}\hlstd{=}\hlnum{0.25}\hlstd{)} \hlopt{+}
-    \hlkwd{stat_qq_line}\hlstd{()} \hlopt{+}
-    \hlkwd{stat_qq_point}\hlstd{()} \hlopt{+}
-    \hlkwd{theme_bw}\hlstd{()}\hlopt{+}
-    \hlkwd{xlab}\hlstd{(}\hlstr{"Gaussian Quantiles"}\hlstd{)}\hlopt{+}
-    \hlkwd{ylab}\hlstd{(}\hlstr{"Sample Quantiles"}\hlstd{)}\hlopt{+}
-    \hlkwd{ggtitle}\hlstd{(}\hlstr{"Normal Quantile-Quantile Plot of Residuals"}\hlstd{)}
-
-
-  \hlcom{########################################}
-  \hlcom{####  Print}
-  \hlcom{########################################}
-  \hlstd{(p1}\hlopt{|}\hlstd{p4)}\hlopt{/}\hlstd{(p2}\hlopt{|}\hlstd{p3)}
-\hlstd{\}}
+\hlcom{#Preparing the functions!}
+\hlkwd{library}\hlstd{(patchwork)}
+\hlkwd{source}\hlstd{(}\hlstr{"https://cipolli.com/students/code/plotResiduals.R"}\hlstd{)}
+\hlkwd{source}\hlstd{(}\hlstr{"https://cipolli.com/students/code/plotInfluence.R"}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1094,15 +560,10 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{library}\hlstd{(patchwork)}
 \hlstd{model1} \hlkwb{<-} \hlkwd{lm}\hlstd{(y2}\hlopt{~}\hlstd{x)}
 \hlkwd{plotResiduals}\hlstd{(model1)}
 \end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'qqplotr'}}
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:ggplot2':\\\#\# \\\#\# \ \ \ \ stat\_qq\_line, StatQqLine}}\end{kframe}
+\end{kframe}
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-15-1} 
 \begin{kframe}\begin{alltt}
 \hlcom{#Variance is the same}
@@ -1135,7 +596,7 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \hlkwd{cor}\hlstd{(x, y3,} \hlkwc{method}\hlstd{=}\hlstr{"pearson"}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.9568558
+## [1] 0.9701446
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -1152,7 +613,7 @@ the image as a .pdf so you can load it instead of rerunning the code.
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-17-1} 
 \begin{kframe}\begin{alltt}
-\hlcom{#It's a skewed normal dist, but it's not homogeneous.}
+\hlcom{#It's a skewed normal dist, but it's homogeneous.}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1311,34 +772,28 @@ in relation to the model of part (b).
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{ggplot}\hlstd{(ggdat,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=y))}\hlopt{+}
-  \hlkwd{geom_smooth}\hlstd{(}\hlkwc{color}\hlstd{=}\hlstr{"blue"}\hlstd{,}
-          \hlkwc{method}\hlstd{=}\hlstr{"lm"}\hlstd{,}
-          \hlkwc{formula}\hlstd{=y}\hlopt{~}\hlstd{x)}\hlopt{+}
-  \hlkwd{geom_point}\hlstd{(}\hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,}
-         \hlkwc{alpha}\hlstd{=}\hlnum{.3}\hlstd{)}\hlopt{+}
-  \hlkwd{theme_bw}\hlstd{()}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-28-1} 
-\begin{kframe}\begin{alltt}
+\hlcom{#ggplot(ggdat, aes(x=x, y=y))+}
+\hlcom{#  geom_smooth(color="blue",}
+\hlcom{#              method="lm",}
+\hlcom{#              formula=y~x)+}
+\hlcom{#  geom_point(shape=1,}
+\hlcom{#             alpha=.3)+}
+\hlcom{#  theme_bw()}
 \hlcom{#there is one unusually small observation!}
 \hlstd{four.model}\hlkwb{<-}\hlkwd{lm}\hlstd{(y}\hlopt{~}\hlstd{x,} \hlkwc{data}\hlstd{=ggdat)}
-\hlstd{four.model.r} \hlkwb{<-} \hlkwd{rlm}\hlstd{(y}\hlopt{~}\hlstd{x,} \hlkwc{data}\hlstd{=ggdat)}
-\end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in rlm(y \textasciitilde{} x, data = ggdat): could not find function "{}rlm"{}}}\begin{alltt}
 \hlkwd{plotResiduals}\hlstd{(four.model)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-28-2} 
-\begin{kframe}\begin{alltt}
-\hlkwd{summary}\hlstd{(four.model.r)}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-28-1} 
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{plotInfluence}\hlstd{(four.model)}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in summary(four.model.r): object 'four.model.r' not found}}\end{kframe}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-29-1} 
 \end{knitrout}
     \item Add the resulting regression line to the plot in part (d) in blue.
 \begin{knitrout}
@@ -1360,15 +815,178 @@ in relation to the model of part (b).
           \hlkwc{method}\hlstd{=}\hlstr{"lm"}\hlstd{,}
           \hlkwc{formula}\hlstd{=y}\hlopt{~}\hlstd{x)}\hlopt{+}
   \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=y),} \hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,}
-         \hlkwc{alpha}\hlstd{=}\hlnum{.3}\hlstd{)}
+         \hlkwc{alpha}\hlstd{=}\hlnum{.3}\hlstd{)}\hlopt{+}
+  \hlkwd{scale_color_manual}\hlstd{(}\hlkwc{values}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"black"}\hlstd{,} \hlstr{"blue"}\hlstd{))}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-29-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-30-1} 
 \end{knitrout}
     \item Refit this model using several robust techniques for dealing with the
     bad observation. Create a plot that summarizes all the approaches taken, and 
     use a metric to select the best model.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(MASS)}
+\hlkwd{library}\hlstd{(sfsmisc)}
+\hlcom{#Hubert}
+\hlcom{#6.0391 + (2.0421 * x)}
+\hlstd{mod.hubert} \hlkwb{<-} \hlkwd{rlm}\hlstd{(y} \hlopt{~} \hlstd{x,} \hlkwc{data}\hlstd{=ggdat,}
+              \hlkwc{psi}\hlstd{=psi.huber)}
+\hlkwd{summary}\hlstd{(mod.hubert)}
+\end{alltt}
+\begin{verbatim}
+## 
+## Call: rlm(formula = y ~ x, data = ggdat, psi = psi.huber)
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -185.2474   -3.1410    0.5295    3.2745   15.3087 
+## 
+## Coefficients:
+##             Value   Std. Error t value
+## (Intercept)  6.0391  1.4224     4.2457
+## x            2.0421  0.0228    89.7473
+## 
+## Residual standard error: 4.747 on 49 degrees of freedom
+\end{verbatim}
+\begin{alltt}
+\hlkwd{f.robftest}\hlstd{(mod.hubert,} \hlkwc{var}\hlstd{=}\hlstr{"x"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## 
+## 	robust F-test (as if non-random weights)
+## 
+## data:  from rlm(formula = y ~ x, data = ggdat, psi = psi.huber)
+## F = 7932.4, p-value < 2.2e-16
+## alternative hypothesis: true x is not equal to 0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#5.7016 + (2.0504 * x)}
+\hlstd{mod.bisquare}\hlkwb{<-}\hlkwd{rlm}\hlstd{(y} \hlopt{~} \hlstd{x,} \hlkwc{data}\hlstd{=ggdat,}
+                  \hlkwc{psi}\hlstd{=psi.bisquare)}
+
+\hlkwd{summary}\hlstd{(mod.bisquare)}
+\end{alltt}
+\begin{verbatim}
+## 
+## Call: rlm(formula = y ~ x, data = ggdat, psi = psi.bisquare)
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -185.739   -3.265    0.056    3.033   15.011 
+## 
+## Coefficients:
+##             Value   Std. Error t value
+## (Intercept)  5.7016  1.4342     3.9755
+## x            2.0504  0.0229    89.3722
+## 
+## Residual standard error: 4.607 on 49 degrees of freedom
+\end{verbatim}
+\begin{alltt}
+\hlkwd{f.robftest}\hlstd{(mod.bisquare,} \hlkwc{var}\hlstd{=}\hlstr{"x"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## 
+## 	robust F-test (as if non-random weights)
+## 
+## data:  from rlm(formula = y ~ x, data = ggdat, psi = psi.bisquare)
+## F = 7888.7, p-value < 2.2e-16
+## alternative hypothesis: true x is not equal to 0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(quantreg)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: SparseM}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'SparseM'}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:base':\\\#\# \\\#\# \ \ \ \ backsolve}}
+
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning in .recacheSubclasses(def@className, def, env): undefined subclass "{}numericVector"{} of class "{}Mnumeric"{}; definition not updated}}\begin{alltt}
+\hlcom{#5.52 + (2.05*x)}
+\hlstd{mod.quant} \hlkwb{<-} \hlkwd{rq}\hlstd{(y}\hlopt{~}\hlstd{x,} \hlkwc{data}\hlstd{=ggdat)}
+\hlkwd{summary}\hlstd{(mod.quant,} \hlkwc{se} \hlstd{=} \hlstr{"ker"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## 
+## Call: rq(formula = y ~ x, data = ggdat)
+## 
+## tau: [1] 0.5
+## 
+## Coefficients:
+##             Value    Std. Error t value  Pr(>|t|)
+## (Intercept)  5.52886  2.88708    1.91504  0.06133
+## x            2.05271  0.04751   43.20164  0.00000
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#6.0391 + (2.0421 * x) — Huber}
+\hlcom{#5.7016 + (2.0504 * x) — Bisquare}
+\hlcom{#5.52 + (2.05*x) — Quantile}
+
+\hlstd{ggdat.compare} \hlkwb{<-} \hlstd{ggdat} \hlopt{%>%}
+  \hlkwd{mutate}\hlstd{(}\hlkwc{original_reg} \hlstd{=} \hlnum{5.2}\hlopt{+}\hlstd{(}\hlnum{2.06}\hlopt{*}\hlstd{x),}
+         \hlkwc{OLS_reg} \hlstd{=} \hlnum{10.742}\hlopt{+}\hlstd{(}\hlnum{1.891}\hlopt{*}\hlstd{x),}
+         \hlkwc{Huber_reg} \hlstd{=} \hlnum{6.0391} \hlopt{+} \hlstd{(}\hlnum{2.0421} \hlopt{*} \hlstd{x),}
+         \hlkwc{Bisquare_reg} \hlstd{=} \hlnum{5.7016} \hlopt{+} \hlstd{(}\hlnum{2.0504} \hlopt{*} \hlstd{x),}
+         \hlkwc{Quantile_reg} \hlstd{=} \hlnum{5.52} \hlopt{+} \hlstd{(}\hlnum{2.05}\hlopt{*}\hlstd{x),}
+         \hlkwc{Population_reg} \hlstd{=} \hlnum{3.5}\hlopt{+}\hlstd{(}\hlnum{2.1}\hlopt{*}\hlstd{x))}\hlopt{%>%}
+  \hlkwd{pivot_longer}\hlstd{(}\hlkwc{cols}\hlstd{=}\hlkwd{ends_with}\hlstd{(}\hlstr{"_reg"}\hlstd{),}
+               \hlkwc{names_to}\hlstd{=}\hlstr{"Plot"}\hlstd{,}
+               \hlkwc{values_to}\hlstd{=}\hlstr{"Pred"}\hlstd{)}
+
+
+\hlkwd{ggplot}\hlstd{(ggdat.compare,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=x,} \hlkwc{y}\hlstd{=Pred))}\hlopt{+}
+  \hlkwd{geom_smooth}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{color}\hlstd{=Plot),}
+              \hlkwc{method}\hlstd{=}\hlstr{"lm"}\hlstd{,}
+              \hlkwc{formula}\hlstd{=y}\hlopt{~}\hlstd{x)}\hlopt{+}
+  \hlkwd{geom_point}\hlstd{(}\hlkwd{aes}\hlstd{(}\hlkwc{y}\hlstd{=y),} \hlkwc{shape}\hlstd{=}\hlnum{1}\hlstd{,}
+             \hlkwc{alpha}\hlstd{=}\hlnum{.3}\hlstd{)}\hlopt{+}
+  \hlkwd{scale_color_manual}\hlstd{(}\hlkwc{values}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"black"}\hlstd{,} \hlstr{"blue"}\hlstd{,} \hlstr{"green"}\hlstd{,} \hlstr{"red"}\hlstd{,} \hlstr{"yellow"}\hlstd{,} \hlstr{"purple"}\hlstd{))}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-34-1} 
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(Metrics)}
+
+\hlcom{#rmse(ggdat$y, predict(mod.quant))}
+\hlcom{#rmse(ggdat$y, predict(mod.hubert))}
+\hlcom{#rmse(ggdat$y, predict(mod.bisquare))}
+
+
+\hlcom{#rmse(test1, test2)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#test1}
+\hlcom{#test2}
+\hlcom{#rmse(ggdat$y, predict(mod.hubert))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
   \end{enumerate}
   \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
