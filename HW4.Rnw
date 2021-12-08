@@ -42,55 +42,53 @@ reached an A1C under 7\%, noting higher A1C is indicative of higher risk of hear
 
 \begin{enumerate}
 \item Explain why this statement alone isn't enough to conclude whether there is a statistically 
-significant difference among the treatments.
+significant difference among the treatments.\\
 
-<<>>=
-"To assess any significant difference we need ot run a t-sample proportion test, but since we only have the information on the proportion of the people seeing beneficial affect in the above question, it is not sufficient information"
-@
+If we want to assess the statistically significant difference among the treatments, a t-sample proprotion test would be out best option. However, we don't have quite enough information to run it, since we have only the percents on our hands. We'd require more information (sample size, for example) before we can make any conclusions.
+
 \item The statement on Ozempic's website comes from a phase 3a randomized double-blind study. 
 \cite{Ahren17} reports that 409 received Ozempic (0.5 mg), 409 received Ozempic (1 mg), and 407 
 received Januvia (100 mg). 
 \begin{enumerate}
   \item Determine whether there is sufficient evidence of a difference in rates of attaining an 
-  A1C under 7\% across treatments.
+  A1C under 7\% across treatments.\\
   
+  Now, when we have more information about the treatments, we can use t-sample proportion test. However, before we do that, it would be highly advisable to check the assumptions first.\\
+  — Data is representative: check.
+  — Two possible outcomes (lowered/did not lower): check.
+  — There are more than 10 instances of success and failure: check.
+  \begin{align*}
+H_{0}&:\hat{p}_{1}=\hat{p}_{2}=\hat{p}_3\\
+H_{a}&:\hat{p}_{1}\neq\hat{p}_{2}\neq\hat{p}_{3}\\
+\end{align*}
 <<>>=
-#https://pubmed.ncbi.nlm.nih.gov/28385659/
-#Mean baseline HbA1c was 8·1%
-#2)
-
-### Remember to write about the assumptions of doing t-sample prop.test#####
-# Successful and total cases for 0.5 mg Ozempic
+# Successfu/total cases for 0.5 mg Ozempic
 x1 = round(0.66*409)
 n1 = 409
 
-# Successful and total cases for 1 mg Ozempic
+# Successful/total cases for 1 mg Ozempic
 x2 = round(0.73*409)
 n2 = 409
 
-# Successful and total cases for 100 mg Januvia
+# Successful/total cases for 100 mg Januvia
 x3 = round(0.4*407)
 n3 = 407
 
-prop.test(x = c(x1, x2, x3), n = c(n1, n2, n3))
-
-# There is a significant p-value to support a difference ()
-
-
-#t sample proportion test
-#DO IT
-
+answer1<-prop.test(x = c(x1, x2, x3), n = c(n1, n2, n3))
+p.value1<-answer1$p.value
+decision<-ifelse(p.value1<0.05, "is", "is not")
+paste("The p-value: (", p.value1,")",
+      sep="")
 @
+P-value provides us with statistically significant evidence to reject the null hypothesis in favor of the alternative.
+
   \item Perform a follow-up analysis for comparing treatments. If you were at high risk for 
   cardiovascular events, which medication would you want to take.
 <<>>=
-pairwise.prop.test(x = c(x1, x2, x3), n = c(n1, n2, n3))
-
-# There is a significant difference between 2 and 3 and 1 and 3 success proportions. So
-# 1 and 2 are better than 3. But if we have alpha = 0.05 then there is also a significant 
-# difference between 1 and 2, in which case 2 (1 mg of Ozempic) is better.
+answer2<-pairwise.prop.test(x = c(x1, x2, x3), n = c(n1, n2, n3))
+answer2
 @
-
+The closer analysis of the pairwise proportion test provides us with the insight that Ozempic treatment is significantly better than the Januvia treatment (with $p<0.001$). However, when it comes to the differences between Ozempic treatments, it's highly advisable to opt for 0.5mg treatment since it provided statistically better results compared to its 1mg alternative.
 
 \end{enumerate}
 \end{enumerate}
@@ -126,10 +124,21 @@ ggdat <- data.frame(x=seq(-5, 5, length.out=5000))%>%
          f1=dnorm(x, mean=0, sd=2))
 
 #set the legend
+@
+\begin{figure}[H]
+\begin{center}
+<<p2plot1, fig.dim=c(6,3.5), message=FALSE>>=
 ggplot(ggdat, aes(x=x, y=f))+
   geom_line(color="blue")+
   geom_line(aes(y=f1), color="red")
 @
+\caption{Laplace distribution with superimposed Gaussian distribution}
+\label{p2plot1}
+\end{center}
+\end{figure}
+Compared to the Guassian distribution, the Laplace one has higher kurtosis. In other terms, with the same mean, it has a higher peak. Moreover, we can observe fatter tails within the Laplae distribution, compared to its Gaussian counterpart. \\
+I might be wrong here, the variance of the Laplace distribution reminds me of the two exponential distributions that face two opposite directions. I assume that if the data is following this distribution, we'd see more values in the tails of the distribution and at its mean.
+
   \item Conduct a simulation study using the Laplace distribution. To do so, 
   complete the following 1000 times and report the proportion of times the
   data lead to a rejection of the null hypothesis.\\
@@ -170,16 +179,21 @@ ggplot(ggdat, aes(x=x, y=f))+
   
 <<warning=FALSE, alert=FALSE, message=FALSE>>=
 library(rstatix)
+
+#Body of the function
 aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5, loop=0,
                     welch=FALSE){
   alpha<-0.05
   count=0
+  #if random number of n is true, we'd use random number 
+  #from uniform distribution
   if(rand.n){
     n1=round(runif(1, min=5, max=100),0)
     n2=round(runif(1, min=5, max=100),0)
     n3=round(runif(1, min=5, max=100),0)
     n4=round(runif(1, min=5, max=100),0)
   }
+  #else: use the number passed on within the function (default: 5)
   else{
     n1=n
     n2=n
@@ -188,19 +202,19 @@ aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5, loop=0,
   }
   
   if(rand.s){
-    #DOUBLE CHECK WITH PROFESSOR
     s1=rgamma(1, 2, 1)
     s2=rgamma(1, 2, 1)
     s3=rgamma(1, 2, 1)
     s4=rgamma(1, 2, 1)
   }else{
-    s1=1
-    s2=1
-    s3=1
-    s4=1
+    s1=2
+    s2=2
+    s3=2
+    s4=2
   }
   for(i in 1:loop){
     if(equal.m){
+      #if mean is equal, pass 0 to the function
       t1<-rlaplace(n=n1, m=0, s=s1)
       label1<-"T1"
       
@@ -215,6 +229,7 @@ aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5, loop=0,
     }
     
     else{
+      #else: pass 1 to the last function
       t1<-rlaplace(n=n1, m=0, s=s1)
       label1<-"T1"
       
@@ -228,19 +243,24 @@ aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5, loop=0,
       label4<-"T4"
     }
     
+    
+    #passing the data with labels
     dat<-data.frame(value=c(t1, t2, t3, t4), 
                     group=c(rep(c("T1", "T2", "T3", "T4"), 
                                                          times=c(length(t1), 
                                                                  length(t2), 
                                                                  length(t3), 
                                                                  length(t4)))))
-    
+    #if we're not using Welch's ANOVA, go here
     if(!welch){
       anova<-summary(aov(value~group, data=dat))
       sum_test <- unlist((anova))
       p.value<-sum_test["Pr(>F)1"]
       #print(p.value) #bugtest
-    }else{
+    }
+    #Use Welch's ANOVA to assess its results when S is different
+    #NOT USED BUT STILL PRETTY COOL
+    else{
       anova_w<-welch_anova_test(value~group, data=dat)
       p.value<-anova_w$p
     }
@@ -251,77 +271,92 @@ aovFunc <- function(rand.n=FALSE, rand.s=FALSE, equal.m=TRUE, n=5, loop=0,
   }
   count/loop
 }
-aovFunc(loop=100)
 @
+
+
+<<>>=
+aovFunc(loop=1000)
+@
+On average, it would appear there were only less than 2 percent of cases when the function had enough evidence to reject the null hypothesis. No wonder: the sample size was really small and the means were equal, so that's exactly what we'd expect to see.
+
 
   \item Repeat the simulation study in (b-d), except with different means; i.e.,
   $m_1=m_2=m_3=0$, and $m_4=1$. Comment on the results of this simulation.
 
 <<warning=FALSE>>=
-aovFunc(equal.m=FALSE, loop=100)
+aovFunc(equal.m=FALSE, loop=1000)
 @
+Yet again, we're using a terribly small sample size, so, on average, only in less than 10 perecent of cases there was enough evidence to reject the null hypothesis. This suggests that ANOVA test majorly depends on its sample size. However, if we want to be certain in it, it would be highly advisable to simulate the same experiment with a bigger sample size.
+
+
 \item Repeat the simulation study in (b-c), except with $n=15$. Comment on the results of this simulation.
 <<warning=FALSE, alert=FALSE, message=FALSE>>=
-aovFunc(equal.m=TRUE, loop=100, n=15)
-aovFunc(equal.m=FALSE, loop=100, n=15)
+aovFunc(equal.m=TRUE, loop=1000, n=15)
+aovFunc(equal.m=FALSE, loop=1000, n=15)
 @
+Now, when we increased the sample size to 15, we can see certain changes within our function. When the means are not equal, ANOVA is able to reject every second test. However, that is equal to a coin toss, so $n=15$ is still not enough to be certain in our results.
+
   \item Repeat the simulation study in (b-c), except with $n=50$.
   Comment on the results of this simulation.
 <<warning=FALSE,alert=FALSE, message=FALSE>>=
-aovFunc(equal.m=TRUE, loop=100, n=50)
-aovFunc(equal.m=FALSE, loop=100, n=50)
+aovFunc(equal.m=TRUE, loop=1000, n=50)
+aovFunc(equal.m=FALSE, loop=1000, n=50)
 @
+With a sample size as big as 50, on average, ANOVA is able to reject only less than 50-60 percent of hypothesis when the means are not equal. It implies that ANOVA is highly sensative to the sample size, and it's imperative for researchers to maintain it high! 
+
 \item Repeat (b-e), except randomly select the sample size for each 
 group by selecting $n$ from the uniform(5,100) distribution. This 
 will help us assess the robustness of the equal sample size assumption
 in the Laplace population distribution case. Comment on the results of 
 this simulation.
 <<>>=
-aovFunc(equal.m=TRUE, rand.n=TRUE, loop=100)
-aovFunc(equal.m=FALSE, rand.n=TRUE, loop=100)
+aovFunc(equal.m=TRUE, rand.n=TRUE, loop=1000)
+aovFunc(equal.m=FALSE, rand.n=TRUE, loop=1000)
 @
+Throughout various runs of this function, I failed to notice consistently high results from ANOVA. It is true that, on average, ANOVA managed to reject 40-50\%+ of null hypothesis when means were not equal. However, it also failed to show consistently high results. I observed 20-30\% of rejected hypothesis as many times as I saw 50-70\% of rejected hypothesis. However, in the case of unequal sample size, I noticed that ANOVA did not show consistently worse results.
+
 \item Repeat (b-f), except randomly select the dispersion for each 
   group by selecting $s$ from the gamma(2,1) distribution. This 
   will help us assess the robustness of the equal variance assumption
   in the Laplace population distribution case. Comment on the results of 
   this simulation.
   <<>>=
-aovFunc(equal.m=TRUE, rand.n=TRUE, rand.s=TRUE, loop=100)
-aovFunc(equal.m=FALSE, rand.n=TRUE, rand.s=TRUE, loop=100)
+aovFunc(equal.m=TRUE, rand.n=TRUE, rand.s=TRUE, loop=1000)
+aovFunc(equal.m=FALSE, rand.n=TRUE, rand.s=TRUE, loop=1000)
 @
+When dispersion is not equal (in addition to unequal sample size), ANOVA test manages to reject, on average, more less 50\% of the hypothesis when the means are not equal. So while in the previous case this result might have been higher than 50\%, an additional difference in variance greatly undermined the power of ANOVA test.
+
 \item Write a loop that conducts this simulation when (1) $s$ is fixed and (2) 
 when $s$ is random, for the case where the means are unequal. The loop should be 
 with respect to $n$, and should run for $n=5$ to $n=200$.\\
-
-<<>>=
-# results<-c()
-# n<-10:50
-# y1<-c()
-# y2<-c()
-# y3<-c()
-# 
-# for(i in 10:50){
-#   print(i)
-#   unequal<-aovFunc(equal.m=FALSE, rand.s=TRUE, loop=100, n=i)
-#   y1<-c(y1, unequal)
-#   equal<-aovFunc(equal.m=FALSE, rand.s=FALSE, loop=100, n=i)
-#   y2<-c(y2, equal)
-#   
-#   wUnequal<-aovFunc(equal.m=FALSE, rand.s=TRUE, loop=100, n=i, welch=T)
-#   y3<-c(y3, wUnequal)
-# }
-# 
-# ggdat<-data.frame(x=n, equal.s=y2, unequal.s=y1,
-#                   welch=y3)
-# ggplot(ggdat, aes(x=x))+
-#   geom_line(aes(y=equal.s), color="red")+
-#   geom_line(aes(y=unequal.s), color="blue")+
-#   geom_line(aes(y=welch), color="black")+
-#   labs(title="Everybody hates Welch")
-
-@
 \textbf{Note:} This can take some computation time, you'll want to run it and save 
 the image as a .pdf so you can load it instead of rerunning the code.
+<<eval=FALSE>>=
+results<-c()
+n<-10:200
+y1<-c()
+y2<-c()
+
+for(i in 10:200){
+  print(i)
+  unequal<-aovFunc(equal.m=FALSE, rand.s=TRUE, loop=1000, n=i)
+  y1<-c(y1, unequal)
+  equal<-aovFunc(equal.m=FALSE, rand.s=FALSE, loop=1000, n=i)
+  y2<-c(y2, equal)
+}
+ggdat<-data.frame(x=n, equal.s=y2, unequal.s=y1)
+@
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.40]{Rplot.png}
+\caption{The assessment of ANOVA performance on Laplace distribution}
+\label{p2plot2}
+\end{center}
+\end{figure}
+
+This graph provides enough evidence to make a conclusion that the variance assumption is far more important for ANOVA than the sample size assumption. We can observe that even with massive sample size the function with unequal variance keeps underpeforming, compared to the with the equal variance. Hence, the reason of using Welch's ANOVA — it will eliminate the assumption about the equal variance.
+
 \end{enumerate}
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -338,7 +373,11 @@ the image as a .pdf so you can load it instead of rerunning the code.
 n=500
 x<-sample(x = seq(0,5,0.01), size=n, replace=T)
 y<-5*x + 3
+@
 
+\begin{figure}[H]
+\begin{center}
+<<p3plot1, fig.dim=c(6,3.5), message=FALSE>>=
 ggdat<-data.frame(x=x, y=y)
 ggplot(ggdat, aes(x=x, y=y))+
   geom_smooth(color="blue",
@@ -346,15 +385,28 @@ ggplot(ggdat, aes(x=x, y=y))+
               formula=y~x)+
   geom_point(shape=1,
              alpha=.3)+
-  theme_bw()
-  #put pearson on the plot
+  theme_bw()+
+  annotate("text", x=1, y=22,
+           label=paste("Pearson correlation:", 
+                       cor(x,y,method="pearson"),"\nPerfect!"))
 @
+\caption{Fitted model for \texttt{x} and \texttt{y}}
+\label{p3plot1}
+\end{center}
+\end{figure}
+We have the Pearson correlation of one! It means that our linear regression perfectly aligns with the data that we have!
+
+
   \item Fit a model to the following simulated data, now with added Normal error. Make
   observations about the model equation and the Pearson correlation in relation to (a).
 <<>>=
 e<-rnorm(n=n,mean=0,sd=3)
 y2<-5*x + 3 + e
+@
 
+\begin{figure}[H]
+\begin{center}
+<<p3plot2, fig.dim=c(6,3.5), message=FALSE>>=
 ggdat<-data.frame(x=x, y=y2)
 ggplot(ggdat, aes(x=x, y=y))+
   geom_smooth(color="blue",
@@ -362,11 +414,20 @@ ggplot(ggdat, aes(x=x, y=y))+
               formula=y~x)+
   geom_point(shape=1,
              alpha=.3)+
-  theme_bw()
-  #put pearson on the plot
-#cor(x, y2, method="pearson")
-
+  theme_bw()+
+  annotate("text", x=1, y=25,
+           label=paste("Pearson correlation:", 
+                       round(cor(x,y2,method="pearson"),2),"\nHighly correlated!"))+
+  labs(title="Fitting the linear regression model",
+       subtitle="With simulated data with added Normal error")
 @
+\caption{Fitted model for \texttt{x} and \texttt{y2}}
+\label{p3plot2}
+\end{center}
+\end{figure}
+
+Based on the visual inspection, the data in the figure \ref{p3plot2} is homoscedastic (equal variance), and the Pearson correlation is 0.93! However, in order to be completely sure in our assessment, we ought to dig deeper and build additional graphs!
+
   \item In the model of part (b), evaluate the normality and homogeneity of error terms. Note 
   that we know both of these items to be true since we've taken $\epsilon \sim 
   \textrm{N}(\mu=0,\sigma=3)$.
@@ -377,39 +438,77 @@ source("https://cipolli.com/students/code/plotResiduals.R")
 source("https://cipolli.com/students/code/plotInfluence.R")
 @
 
-  <<warning=FALSE, alert=FALSE, message=FALSE>>=
+We'll start off with building \texttt{lm()} model for our data!
+
+<<warning=FALSE, alert=FALSE, message=FALSE>>=
 model1 <- lm(y2~x)
-plotResiduals(model1)
-#Variance is the same
-#https://uc-r.github.io/assumptions_homogeneity#visualization
 @
+
+\begin{figure}[H]
+\begin{center}
+<<p3plot3, fig.dim=c(6,3.5), message=FALSE>>=
+plotResiduals(model1)
+@
+\caption{Simulated data: \textbf{Top Left:} A fitted versus residual scatterplot.
+\textbf{Top Right:} A normal q-q plot of the residuals. \textbf{Bottom Left:} A histogram of the residuals with a density curve. \textbf{Bottom Right:} A cumulitive density plot with an empirical density plot.}
+\label{p3plot3}
+\end{center}
+\end{figure}
+
+Looking at plot \ref{p3plot3}, it's obvious that residuals are Gaussian: q-q plot looks normal and assumed Gaussian distribution follows closely the observed distribution. In the fitted values versus residuals plot, we can observe that the data has equal variance. 
+
 \item Fit a model to the following simulated data, now with added exponential error.
   Make observations about the model equation and the Pearson correlation in relation 
   to the model of part (b).
 <<>>=
 e<-rexp(n=n,rate = 1/2)
 y3<-5*x + 3 + e
+@
 
+\begin{figure}[H]
+\begin{center}
+<<p3plot4, fig.dim=c(6,3.5), message=FALSE>>=
 ggdat<-data.frame(x=x, y=y3)
-ggplot(ggdat, aes(x=x, y=y))+
+ggplot(ggdat, aes(x=x, y=y3))+
   geom_smooth(color="blue",
               method="lm",
               formula=y~x)+
   geom_point(shape=1,
              alpha=.3)+
-  theme_bw()
-  #put pearson on the plot
-cor(x, y3, method="pearson")
+  theme_bw()+
+  annotate("text", x=1, y=25,
+           label=paste("Pearson correlation:", 
+                       round(cor(x,y3,method="pearson"),2),"\nHighly correlated!"))+
+  labs(title="Fitting the linear regression model",
+       subtitle="With simulated data with added exponential error")
 @
+\caption{Fitted model for \texttt{x} and \texttt{y3}}
+\label{p3plot4}
+\end{center}
+\end{figure}
+The Pearson correlation tells us that values \texttt{x} and \texttt{y3} are highly correlated. Through visual inspection, it's easier to notice that the data apepars skewed towards one side. I would assume that the constant variance assumption holds true though! However, yet again, we ought to build more plots to assess the validity of my assumptions.
 
   \item In the model of part (d), evaluate the normality and homogeneity of error 
   terms. Note that we know that common variance is true but we've taken $\epsilon \sim 
   \textrm{exp}(\beta=2)$.
   <<>>=
 model2 <- lm(y3~x)
-plotResiduals(model2)
-#It's a skewed normal dist, but it's homogeneous.
+#It's a skewed normal distribution, but it's homoscedastic!
 @
+
+\begin{figure}[H]
+\begin{center}
+<<p3plot5, fig.dim=c(6,3.5), message=FALSE>>=
+plotResiduals(model2)
+@
+\caption{Simulated data: \textbf{Top Left:} A fitted versus residual scatterplot.
+\textbf{Top Right:} A normal q-q plot of the residuals. \textbf{Bottom Left:} A histogram of the residuals with a density curve. \textbf{Bottom Right:} A cumulitive density plot with an empirical density plot.}
+\label{p3plot5}
+\end{center}
+\end{figure}
+
+The first thing that's worth noting is that my visual inspection was correct. The Residual density histogram shows the skewed data. Moreoever, the ends of the q-q plot support this observation. However, it's worth noting that data appears to be homoscedastic! These differences lead to the observed differences in the cumulative density. We can be confident that errors do not follow the normal distribution!
+
 \item Fit a model to the following simulated data, now with added Heteroskedastic
 normal error. Make observations about the model equation and the Pearson correlation
 in relation to the model of part (b).
@@ -417,7 +516,11 @@ in relation to the model of part (b).
 x4<-x[order(x)] 
 e<-rnorm(n=n,mean=0,sd=c(rep(1,n/2),rep(3,n/2))) 
 y4<-5*x4 + 3 + e
+@
 
+\begin{figure}[H]
+\begin{center}
+<<p3plot6, fig.dim=c(6,3.5), message=FALSE>>=
 ggdat<-data.frame(x=x4, y=y4)
 ggplot(ggdat, aes(x=x, y=y))+
   geom_smooth(color="blue",
@@ -425,17 +528,43 @@ ggplot(ggdat, aes(x=x, y=y))+
               formula=y~x)+
   geom_point(shape=1,
              alpha=.3)+
-  theme_bw()
+  theme_bw()+
+  annotate("text", x=1, y=25,
+           label=paste("Pearson correlation:", 
+                       round(cor(x4,y4,method="pearson"),2),"\nHighly correlated!"))+
+  labs(title="Fitting the linear regression model",
+       subtitle="With simulated data with added heteroskedastic normal error")
 @
+\caption{Fitted model for \texttt{x} and \texttt{y4}}
+\label{p3plot6}
+\end{center}
+\end{figure}
+
+The Pearson correlation keeps showing that values of \texttt{x} and \texttt{y} are highly correlated. However, it's important to stress that even the brief visual inspection allows us to notice the heteroskedastic nature of the data that we are working with! It would appear than variance is different for the values that are lower than 2.5 and the ones that are higher than that. 
+
   \item In the model of part (f), evaluate the normality and homogeneity of error terms. Note
   that we know that normality of error terms is true, but $\epsilon \sim 
   \textrm{N}(\mu=0,\sigma=1)$ for $x<\widehat{m}$ and $\epsilon \sim 
   \textrm{N}(\mu=0,\sigma=3)$ for $x>\widehat{m}$.
   <<>>=
 model3 <- lm(y4~x4)
+@
+
+
+\begin{figure}[H]
+\begin{center}
+<<p3plot7, fig.dim=c(6,3.5), message=FALSE>>=
 plotResiduals(model3)
 @
+\caption{Simulated data: \textbf{Top Left:} A fitted versus residual scatterplot.
+\textbf{Top Right:} A normal q-q plot of the residuals. \textbf{Bottom Left:} A histogram of the residuals with a density curve. \textbf{Bottom Right:} A cumulitive density plot with an empirical density plot.}
+\label{p3plot7}
+\end{center}
+\end{figure}
 \end{enumerate}
+
+Unlike the plot\ref{p3plot5} that we've been working on before, the plot\ref{p3plot7}'s errors follow actually follow the normal distribution. The assumed Gaussian distribution fits incredibly well to the observed empirical distribution. However, this time we ought to pay attention to the the fitted values versus residuals plot. It shows the change in variance, implying that the data is heteroskedastic!
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%  Question 4
@@ -453,46 +582,55 @@ ggdat <- data.frame(x=sample(x=seq(0,100,0.01),size=n,replace=TRUE)) %>%
   mutate(y=3.5+2.1*x+rnorm(n=n,mean=0,sd=5))
 @
     \item Write out the population model.
-<<>>=
-#Y=B{0}+B{1}{x} + error
-@
+      \begin{align*}
+      \hat{Y}=3.5+(2.1*x)+\epsilon
+      \end{align*}
+      It's also crucial to note that the population model's error is going to be normal.
     \item Fit the model based on the sample data and write out the sample model below.
 <<>>=
-#hat(Y)=hat(B{0})+hat(B){1}{x}
 four.model<-lm(y~x, data=ggdat)
-summary(four.model)
-
-#hat(B){0}=5.22
-#hat(B){1}{x}=2.06
-
-#hat(Y)=-5.22+2.06x
-
-#Prediction = 5.22+2.06(x) + (random error)
+answer3<-summary(four.model)
+answer3$coefficients
+#Prediction = 5.22+2.06(x) + (error)
 @
+      \begin{align*}
+      \hat{Y}=5.22+(2.06*x)+\epsilon
+      \end{align*}
     \item Add the regression line to the plot in black.
-<<>>=
+\begin{figure}[H]
+\begin{center}
+<<p4plot1, fig.dim=c(6,3.5), message=FALSE>>=
 ggplot(ggdat, aes(x=x, y=y))+
   geom_smooth(color="black",
               method="lm",
               formula=y~x)+
   geom_point(shape=1,
              alpha=.3)+
-  theme_bw()
+  theme_bw()+
+  labs(title="Fitting the linear regression model",
+       subtitle="For simulated data")
 @
+\caption{Fitted model for \texttt{x} and \texttt{y}}
+\label{p4plot1}
+\end{center}
+\end{figure}
+It would appear that plot\ref{p4plot1} manages to approximate our data reasonably well. In order to verify its ability to explain the observation that we have, I suggest using $R^2$ value!
+
+
     \item Interpret the $R^2$ of the model.
     <<>>=
-#Adjusted R-squared:  0.9937 
-#99% of the variance can be explained by the model we built.
-
+paste("Adjusted R-squared:", answer3$adj.r.squared)
 @
+This implies that 99\% of variance in data can be explained with the model that we've created! 
     \item Interpret the overall $F$ test of the model.
     <<>>=
-#Look at p-value
+answer3$fstatistic
 @
+We have an incredibly high F-statistic which implies that our model has great predictive capability. Moreover, F-statistic shows (with $p<0.0001$) that our model provided us with the statistically significant results!
+
     \item Interpret the coefficients of the model; are they what you would expect?
-    <<>>=
-#Yeah, that's easy.
-@
+They're exactly what I expected them to be. The intercept begins at 5.2, which is approximately the first data point in our dataset. Then, with each additional value of x, the value of y increases by 2.06. It seems to approximate the data rather well!
+
     \item Now, let's add a bad datapoint to the data.
 <<>>=
 ggdat <- rbind(ggdat,     # original data
@@ -500,60 +638,80 @@ ggdat <- rbind(ggdat,     # original data
 @
   \begin{enumerate}
     \item Briefly summarize how adding this data point affects parts (a)-(g).
-    <<>>=
-#ggplot(ggdat, aes(x=x, y=y))+
-#  geom_smooth(color="blue",
-#              method="lm",
-#              formula=y~x)+
-#  geom_point(shape=1,
-#             alpha=.3)+
-#  theme_bw()
-#there is one unusually small observation!
-four.model<-lm(y~x, data=ggdat)
-plotResiduals(four.model)
-@
-
+    Before giving any assessments, I would rather check with BFFITs if the added observation is an outlier.
 <<>>=
+four.model<-lm(y~x, data=ggdat)
+@ 
+  
+\begin{figure}[H]
+\begin{center}
+<<p4plot3, fig.dim=c(6,3.5), message=FALSE>>=
 plotInfluence(four.model)
 @
+\caption{Plots for asessing the influence of outliers on the linear regression model}
+\label{p4plot3}
+\end{center}
+\end{figure}
+Based on both Cook's Distance values and DFFITs values, we have a massive outlier that has an oversized influence on our regression model, compared to the previous datapoints. Therefore, it would be highly advisable to come up with a way to deal with it.
+  
+  
     \item Add the resulting regression line to the plot in part (d) in blue.
     <<>>=
 #5.2+(2.06*x)
 #10.742+(1.891*x)
-
 ggdat.final <- ggdat %>%
   mutate(beforeAdding = 5.2+(2.06*x),
          afterAdding = 10.742+(1.891*x))%>%
   pivot_longer(cols=ends_with("Adding"),
                names_to="Plot",
                values_to="Pred")
+@
 
-
+\begin{figure}[H]
+\begin{center}
+<<p4plot4, fig.dim=c(6,3.5), message=FALSE>>=
 ggplot(ggdat.final, aes(x=x, y=Pred))+
   geom_smooth(aes(color=Plot),
               method="lm",
               formula=y~x)+
   geom_point(aes(y=y), shape=1,
              alpha=.3)+
-  scale_color_manual(values=c("black", "blue"))
-
+  scale_color_manual(values=c("black", "blue"),
+                     label=c("After",
+                             "Before"))+
+  labs(title="Fitting the linear regression models",
+       subtitle="For simulated data with an outlier",
+       color="Adding an outlier",
+       y="y")
 @
+\caption{Plot assessing the influence of an outlier on the linear regression model}
+\label{p4plot4}
+\end{center}
+\end{figure}
+
+It would appear that the outlier pulls our linear model down. Therefore, we can expect it to undervalue its predictions regarding our data. Before we go on to using various techniques of dealing with the bad observation, it's important to stress that in the scientific environment we ought to speak with the researchers first. Based on the field and the research context, it might be reasonable to leave those observations in the model.
+
     \item Refit this model using several robust techniques for dealing with the
     bad observation. Create a plot that summarizes all the approaches taken, and 
     use a metric to select the best model.
-    <<warning=FALSE, alert=FALSE, message=FALSE>>=
+
+The first model we approach we are going to use is iteratively reweighted least squares.
+<<warning=FALSE, alert=FALSE, message=FALSE>>=
 library(MASS)
 library(sfsmisc)
 #Hubert
-#6.0391 + (2.0421 * x)
+#6.0391 + (2.0421 * x) + e
 mod.hubert <- rlm(y ~ x, data=ggdat,
                   psi=psi.huber)
 summary(mod.hubert)
-f.robftest(mod.hubert, var="x")
-
 @
+Result:\\
+      \begin{align*}
+      Huber=6.0391+(2.0421*x)+\epsilon\\
+      \end{align*}
 
-<<>>=
+The second approach we're going to explore is the Bisquare iteratively reweighted least squares model.
+<<warning=FALSE, alert=FALSE, message=FALSE>>=
 #5.7016 + (2.0504 * x)
 mod.bisquare<-rlm(y ~ x, data=ggdat,
                   psi=psi.bisquare)
@@ -561,14 +719,24 @@ mod.bisquare<-rlm(y ~ x, data=ggdat,
 summary(mod.bisquare)
 f.robftest(mod.bisquare, var="x")
 @
+Result:\\
+      \begin{align*}
+      Bisquare=5.7016+(2.0504*x)+\epsilon\\
+      \end{align*}
 
-<<>>=
+Since we are dealing with an outlier, it's also reasonable to use the quantile regression model. It's working with the median, so it won't be affected by the odd observation. 
+<<warning=FALSE, alert=FALSE, message=FALSE>>=
 library(quantreg)
 #5.52 + (2.05*x)
 mod.quant <- rq(y~x, data=ggdat)
 summary(mod.quant, se = "ker")
 @
+Result:\\
+\begin{align*}
+      Quantile=5.52+(2.05*x)+\epsilon\\
+      \end{align*}
 
+Finally, let's compare the results we've got! 
 <<>>=
 #6.0391 + (2.0421 * x) — Huber
 #5.7016 + (2.0504 * x) — Bisquare
@@ -584,34 +752,42 @@ ggdat.compare <- ggdat %>%
   pivot_longer(cols=ends_with("_reg"),
                names_to="Plot",
                values_to="Pred")
+@
 
-
+\begin{figure}[H]
+\begin{center}
+<<p4plot5, fig.dim=c(6,3.5), message=FALSE>>=
 ggplot(ggdat.compare, aes(x=x, y=Pred))+
   geom_smooth(aes(color=Plot),
               method="lm",
               formula=y~x)+
   geom_point(aes(y=y), shape=1,
              alpha=.3)+
-  scale_color_manual(values=c("black", "blue", "green", "red", "yellow", "purple"))
+  scale_color_manual(values=c("black", "blue", "green", "red", "yellow", "purple"),
+                     labels=c("Bisquare", "Huber", "OLS", "Before outlier", "Population",
+                              "Quantile"))+
+  labs(title="Fitting the linear regression models",
+       subtitle="For simulated data with an outlier",
+       color="Technique",
+       y="y")
 @
+\caption{Plot assessing the effect of robust techniques of dealing with bad observations}
+\label{p4plot5}
+\end{center}
+\end{figure}
 
+It would appear that most of the robust models that we've built essentially overlap with each other. I suggest that we can use root mean squared error to assess the model that fits data the most! Based on the visual inspection alone, I suggest that we can drop the OLS model, since it's too influenced by the outlier.
 <<>>=
 library(Metrics)
 
-#rmse(ggdat$y, predict(mod.quant))
-#rmse(ggdat$y, predict(mod.hubert))
-#rmse(ggdat$y, predict(mod.bisquare))
-
-
-#rmse(test1, test2)
-@
-
-<<>>=
-#test1
-#test2
-#rmse(ggdat$y, predict(mod.hubert))
+rmse(ggdat$y, predict(mod.quant))
+rmse(ggdat$y, predict(mod.hubert))
+rmse(ggdat$y, predict(mod.bisquare))
 
 @
+
+It would appear that Huber's IRWLS gives back the best results, so I suggest that we should use this model to predict the values. However, it's still important to stress the point that I've made earlier: before making any decisions, it's highly advisable to talk to the research partners to clarify their opinion on it. We might not have to even adjust our linear regression model! \\Communication is the key!\\Thank you for this semester, it was so much fun!
+
   \end{enumerate}
   \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
