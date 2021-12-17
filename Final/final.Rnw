@@ -167,5 +167,41 @@ Plot plot.
 <<workethicplot>>
 @
 
+<<>>=
+library(GGally)
+view(dat)
+dat %>%
+  select(PsWhite)%>%
+  view()
+
+colnames(dat)
+df <- dat %>%
+  select(c(Wpoor, Bpoor, HardworkingWelf, PsWhite, edu, income, Democrat))%>%
+  mutate(PsWhite = factor(PsWhite, levels=c("0", "1"),
+                          labels=c("Black","White")),
+         Democrat = factor(Democrat, levels=c("0", "1"),
+                           labels=c("Rep", "Dem")))
+ggpairs(df, progress = F, upper= "blank",
+        lower = list(continuous = "points",
+                     combo = "box_no_facet",
+                     discrete = "count",
+                     na = "na"))
+
+reg1<-lm(HardworkingWelf ~ PsWhite*Wpoor,
+   data=df)
+summary(reg1)
+
+library(emmeans)
+emtrends(reg1,
+         specs = ~PsWhite,
+         var="Wpoor")
+
+
+dat.ladder <- read_csv(file = "https://cipolli.com/students/data/LadderDiff.csv")
+view(dat.ladder)
+#We have sufficient evidence that the absorption percentage Y is positively linearly related to ma-
+#chine filtration rate x in the population (t = 8.484, p−value < 0.0001).
+@
+
 \end{scriptsize}
 \end{document}
