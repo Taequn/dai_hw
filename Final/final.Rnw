@@ -187,20 +187,51 @@ ggpairs(df, progress = F, upper= "blank",
                      discrete = "count",
                      na = "na"))
 
-reg1<-lm(HardworkingWelf ~ PsWhite*Wpoor,
+reg1<-lm(HardworkingWelf ~ PsWhite*Wpoor+Democrat+Bpoor+edu+income+Bpoor,
    data=df)
 summary(reg1)
 
-library(emmeans)
-emtrends(reg1,
-         specs = ~PsWhite,
-         var="Wpoor")
+#Y = 3.61 - 0.51x - 0.02x + 0.61x - 0.04x + 0.03x - 0.007x + x1*x2
 
+
+#IMPORTANT
+library(emmeans)
+test(emtrends(reg1, specs = ~PsWhite, var="Wpoor"))
+#From the perseption of black people. The more they perceive people to be more, the less they thought about the work ethic of those getting $$$
+#The opposite for white
 
 dat.ladder <- read_csv(file = "https://cipolli.com/students/data/LadderDiff.csv")
 view(dat.ladder)
 #We have sufficient evidence that the absorption percentage Y is positively linearly related to ma-
 #chine filtration rate x in the population (t = 8.484, p−value < 0.0001).
+
+
+#WORKS MAYBE
+# model.x<-lm(HardworkingWelf ~ PsWhite, data=df)
+# summary(model.x)
+# model.m<-lm(Wpoor ~ PsWhite, data=df)
+# summary(model.m)
+# model.y<-lm(HardworkingWelf ~ Wpoor + PsWhite, data=df)
+# summary(model.y)
+
+# model.x<-lm(HardworkingWelf ~ PsWhite, data=df)
+# summary(model.x)
+# model.m<-lm(Wpoor ~ PsWhite, data=df)
+# summary(model.m)
+# model.y<-lm(HardworkingWelf ~ PsWhite + Wpoor, data=df)
+# summary(model.y)
+
+# library(mediation)
+# results<-mediate(model.m, model.y, treat='PsWhite', mediator='HardworkingWelf',
+#                    boot=TRUE, sims=500)
+# summary(results)
+
+#7.56e-05 — x-y
+#6.45e-05 — x-m
+#3.81e-05 *** — x-y with m
+
+library(acs)
+acs
 @
 
 \end{scriptsize}
